@@ -27,6 +27,17 @@ export const getRepositoryGraph = async (req: Request, res: Response): Promise<a
         const edges: any[] = [];
         const folderNodesMap = new Map();
 
+        // Add root node
+        const rootId = "root";
+        folderNodesMap.set(rootId, {
+            id: rootId,
+            path: rootId,
+            name: repo.name || "Repository",
+            type: "folder",
+            val: 20,
+            metadata: { isFolder: true, descendentCount: 0 }
+        });
+
         // 1. Process files and build folder hierarchy
         for (const file of files) {
             // File Node
@@ -53,7 +64,7 @@ export const getRepositoryGraph = async (req: Request, res: Response): Promise<a
             
             // Loop through directories (excluding the file itself)
             for (let i = 0; i < parts.length - 1; i++) {
-                const parentPath = currentPath;
+                const parentPath = currentPath || rootId;
                 const part = parts[i] as string;
                 currentPath = currentPath ? `${currentPath}/${part}` : part;
                 
@@ -68,28 +79,25 @@ export const getRepositoryGraph = async (req: Request, res: Response): Promise<a
                     });
                     
                     // Folder -> Folder edge
-                    if (parentPath) {
-                        edges.push({
-                            source: parentPath,
-                            target: currentPath,
-                            label: "contains",
-                            line: 0
-                        });
-                    }
+                    edges.push({
+                        source: parentPath,
+                        target: currentPath,
+                        label: "contains",
+                        line: 0
+                    });
                 } else {
                     folderNodesMap.get(currentPath).metadata.descendentCount++;
                 }
             }
 
             // Folder -> File edge (connect relative folder to absolute file ID)
-            if (currentPath) {
-                edges.push({
-                    source: currentPath,
-                    target: file.filePath,
-                    label: "contains",
-                    line: 0
-                });
-            }
+            const parentOfFile = currentPath || rootId;
+            edges.push({
+                source: parentOfFile,
+                target: file.filePath,
+                label: "contains",
+                line: 0
+            });
         }
 
         // Add all distinct folder nodes to the main nodes array

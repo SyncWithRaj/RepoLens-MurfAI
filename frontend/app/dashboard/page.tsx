@@ -173,13 +173,21 @@ export default function Dashboard() {
                                 )}
 
                                 {repo.status === "indexed" && (
-                                    <button
-                                        onClick={() => embedRepo(repo._id)}
-                                        disabled={embeddingRepo === repo._id}
-                                        className="text-sm bg-[#58a6ff] hover:bg-[#1f6feb] border border-[rgba(240,246,252,0.1)] text-white font-medium px-5 py-2.5 rounded-xl transition shadow-sm disabled:opacity-50"
-                                    >
-                                        {embeddingRepo === repo._id ? "Preparing Chat..." : "Chat with Codebase"}
-                                    </button>
+                                    <>
+                                        <button
+                                            onClick={() => router.push(`/graph/${repo._id}`)}
+                                            className="text-sm bg-[#21262d] hover:bg-[var(--color-gh-border)] border border-[var(--color-gh-border)] text-[#c9d1d9] font-medium px-5 py-2.5 rounded-xl transition shadow-sm"
+                                        >
+                                            Visualize Codebase
+                                        </button>
+                                        <button
+                                            onClick={() => embedRepo(repo._id)}
+                                            disabled={embeddingRepo === repo._id}
+                                            className="text-sm bg-[#58a6ff] hover:bg-[#1f6feb] border border-[rgba(240,246,252,0.1)] text-white font-medium px-5 py-2.5 rounded-xl transition shadow-sm disabled:opacity-50"
+                                        >
+                                            {embeddingRepo === repo._id ? "Preparing Chat..." : "Chat with Codebase"}
+                                        </button>
+                                    </>
                                 )}
 
                                 <button

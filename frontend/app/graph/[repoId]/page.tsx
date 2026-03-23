@@ -7,9 +7,8 @@ import api from "@/lib/axios";
 import GraphView from "@/components/graph/GraphView";
 import CodeEditor from "@/components/editor/CodeEditor";
 import { Panel, Group, Separator } from "react-resizable-panels";
-import { Network, MessageSquare, Settings, X, Files } from "lucide-react";
+import { Network, Settings, X, Files } from "lucide-react";
 import { useEditor } from "@/context/EditorContext";
-import Link from "next/link";
 
 export default function GraphPage() {
   const { repoId } = useParams();
@@ -38,7 +37,7 @@ export default function GraphPage() {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <p>Loading Workspace...</p>
+          <p className="animate-pulse">Loading Graph Visualization...</p>
         </div>
       </div>
     );
@@ -49,17 +48,17 @@ export default function GraphPage() {
   };
 
   return (
-    <div className="flex flex-grow overflow-hidden bg-[#010409] text-[#c9d1d9] font-sans h-screen p-2 gap-2">
+    <div className="flex flex-grow overflow-hidden bg-[#010409] text-[#c9d1d9] font-sans h-[calc(100vh-64px)] p-2 gap-2">
       {/* Activity Bar */}
       <div className="w-[50px] min-w-[50px] flex flex-col items-center py-4 bg-[#0d1117] rounded-xl border border-[#30363d] shadow-sm z-10 space-y-4">
-        <Link href={`/chat/${repoId}`} className="p-2 rounded-xl transition text-[#8b949e] hover:text-[#c9d1d9]" title="Chat Interface">
-          <MessageSquare size={22} strokeWidth={1.5} />
-        </Link>
-        <button className="p-2 rounded-xl transition text-white bg-[#21262d] shadow-sm border border-[#30363d]" title="Graph View">
+        <button 
+          className="p-2 rounded-xl transition text-[#58a6ff] bg-[#21262d] shadow-sm border border-[#30363d] hover:scale-105"
+          title="Graph View"
+        >
           <Network size={22} strokeWidth={1.5} />
         </button>
         <div className="flex-grow"></div>
-        <button className="p-2 text-[#8b949e] hover:text-[#c9d1d9] transition rounded-xl mb-2" title="Settings">
+        <button className="p-2 text-[#8b949e] hover:text-[#c9d1d9] transition rounded-xl mb-2 hover:scale-110" title="Settings">
           <Settings size={22} strokeWidth={1.5} />
         </button>
       </div>
@@ -67,43 +66,41 @@ export default function GraphPage() {
       {/* Main Resizable Area */}
       <div className="flex-grow h-full overflow-hidden">
         <Group orientation="horizontal" className="w-full h-full">
-          
-          {/* Force Graph View */}
-          <Panel className="h-full">
-            <div className="h-full bg-[#0d1117] rounded-xl border border-[#30363d] overflow-hidden shadow-sm flex flex-col">
-              <GraphView repoId={repoId as string} />
-            </div>
+
+          {/* Center Area (Graph) */}
+          <Panel id="graph" defaultSize={60} minSize={20} className="h-full min-w-[200px]">
+             <div className="h-full bg-[#0d1117] rounded-xl border border-[#30363d] overflow-hidden shadow-sm flex flex-col relative group">
+               <GraphView repoId={repoId as string} />
+             </div>
           </Panel>
 
-          {/* Sliding Editor Panel */}
-          {editorState?.filePath && (
-            <>
-              <Separator className="w-2 flex items-center justify-center cursor-col-resize group relative hover:opacity-100 transition-opacity">
-                <div className="h-10 w-1 bg-[#30363d] rounded-full group-hover:bg-[#58a6ff] transition-colors" />
-              </Separator>
+          {/* Sliding Editor Panel (Unconditional Layout, Condition on Data) */}
+          <Separator className="w-2 flex items-center justify-center cursor-col-resize group relative hover:opacity-100 transition-opacity">
+            <div className="h-10 w-1 bg-[#30363d] rounded-full group-hover:bg-[#58a6ff] transition-colors" />
+          </Separator>
 
-              <Panel defaultSize={40} minSize={25} className="h-full pl-1">
-                <div className="h-full bg-[#0d1117] rounded-xl border border-[#30363d] overflow-hidden shadow-sm flex flex-col relative">
-                  
-                  {/* File Header with Close Button */}
-                  <div className="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
-                    <div className="flex items-center gap-2 text-sm text-[#c9d1d9]">
-                      <Files size={16} className="text-[#8b949e]" />
-                      <span className="truncate max-w-[200px]">{editorState.filePath.split("/").pop()}</span>
-                    </div>
-                    <button onClick={closeEditor} className="p-1 hover:bg-[#30363d] rounded transition text-[#8b949e] hover:text-[#c9d1d9]">
-                      <X size={16} />
-                    </button>
-                  </div>
-
-                  {/* Monaco Editor */}
-                  <div className="flex-grow overflow-hidden">
-                    <CodeEditor />
-                  </div>
+          <Panel id="editor" defaultSize={40} minSize={20} className="h-full">
+            <div className="h-full bg-[#0d1117] rounded-xl border border-[#30363d] overflow-hidden shadow-sm flex flex-col relative focus-within:ring-1 focus-within:ring-[#58a6ff] transition-shadow">
+              
+              {/* File Header with Close Button */}
+              <div className="flex items-center justify-between px-4 py-2 border-b border-[#30363d] bg-[#161b22]">
+                <div className="flex items-center gap-2 text-sm text-[#c9d1d9]">
+                  <Files size={16} className="text-[#8b949e]" />
+                  <span className="truncate max-w-[200px] font-mono text-xs text-[#58a6ff]">{editorState?.filePath ? editorState.filePath.split("/").pop() : "No Context Selected"}</span>
                 </div>
-              </Panel>
-            </>
-          )}
+                {editorState?.filePath && (
+                  <button onClick={closeEditor} className="p-1.5 hover:bg-[#30363d] rounded-md transition text-[#8b949e] hover:text-[#ff7b72]">
+                    <X size={16} strokeWidth={2} />
+                  </button>
+                )}
+              </div>
+
+              {/* Monaco Editor */}
+              <div className="flex-grow overflow-hidden custom-scrollbar">
+                <CodeEditor />
+              </div>
+            </div>
+          </Panel>
 
         </Group>
       </div>

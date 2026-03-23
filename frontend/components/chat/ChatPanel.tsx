@@ -59,11 +59,11 @@ export default function ChatPanel({
 
       <div className="flex-1 overflow-y-auto p-3 space-y-4 bg-[#18181b] custom-scrollbar">
         {messages.length === 0 ? (
-          <div className="text-center py-8">
-            <svg className="mx-auto h-10 w-10 text-[var(--color-gh-border)] mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="text-center py-12 flex flex-col items-center justify-center h-full">
+            <svg className="h-10 w-10 text-[#30363d] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
-            <p className="text-xs text-[#8b949e]">Ask a question about the code</p>
+            <p className="text-sm text-[#8b949e]">Ask a question about the codebase</p>
           </div>
         ) : (
           messages.map((msg: any, i: number) => (

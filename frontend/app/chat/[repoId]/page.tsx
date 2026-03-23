@@ -115,26 +115,26 @@ export default function ChatPage() {
   const toggleChat = () => setShowChat(!showChat);
 
   return (
-    <div className="flex flex-grow overflow-hidden bg-[#010409] text-[#c9d1d9] font-sans h-screen p-2 gap-2">
+    <div className="flex flex-grow overflow-hidden bg-[#010409] text-[#c9d1d9] font-sans h-[calc(100vh-74px)] p-2 gap-2">
       
       {/* Activity Bar (VSCode style) */}
-      <div className="w-[50px] min-w-[50px] flex flex-col items-center py-4 bg-[#0d1117] rounded-xl border border-[var(--color-gh-border)] shadow-sm z-10 space-y-4">
+      <div className="w-[50px] min-w-[50px] flex flex-col items-center py-4 bg-[#0d1117] rounded-xl border border-[#30363d] shadow-sm z-10 space-y-4">
         <button 
           onClick={toggleSidebar}
-          className={`p-2 rounded-xl transition ${activeSidebar === "files" ? "text-white bg-[#21262d] shadow-sm border border-[var(--color-gh-border)]" : "text-[#8b949e] hover:text-[#c9d1d9]"}`}
+          className={`p-2 rounded-xl transition ${activeSidebar === "files" ? "text-[#58a6ff] bg-[#21262d] shadow-sm border border-[#30363d] scale-105" : "text-[#8b949e] hover:text-[#c9d1d9]"}`}
           title="Explorer"
         >
           <Files size={22} strokeWidth={1.5} />
         </button>
         <button 
           onClick={toggleChat}
-          className={`p-2 rounded-xl transition ${showChat ? "text-white bg-[#21262d] shadow-sm border border-[var(--color-gh-border)]" : "text-[#8b949e] hover:text-[#c9d1d9]"}`}
+          className={`p-2 rounded-xl transition ${showChat ? "text-[#2ea043] bg-[#21262d] shadow-sm border border-[#30363d] scale-105" : "text-[#8b949e] hover:text-[#c9d1d9]"}`}
           title="Chat Panel"
         >
           <MessageSquare size={22} strokeWidth={1.5} />
         </button>
         <div className="flex-grow"></div>
-        <button className="p-2 text-[#8b949e] hover:text-[#c9d1d9] transition rounded-xl mb-2" title="Settings">
+        <button className="p-2 text-[#8b949e] hover:text-[#c9d1d9] transition rounded-xl mb-2 hover:scale-110" title="Settings">
           <Settings size={22} strokeWidth={1.5} />
         </button>
       </div>
@@ -144,46 +144,46 @@ export default function ChatPage() {
         <Group orientation="horizontal" className="w-full h-full">
           {/* File Explorer Panel */}
           {activeSidebar === "files" && (
-            <>
-              <Panel defaultSize={20} minSize={15} className="h-full pr-1">
-                <div className="h-full bg-[#0d1117] rounded-xl border border-[var(--color-gh-border)] overflow-hidden shadow-sm flex flex-col">
-                  <FileExplorer repoId={repoId} />
-                </div>
-              </Panel>
+            <Panel defaultSize={18} minSize={10} className="h-full pr-1">
+              <div className="h-full bg-[#0d1117] rounded-xl border border-[#30363d] overflow-hidden shadow-sm flex flex-col">
+                <FileExplorer repoId={repoId} />
+              </div>
+            </Panel>
+          )}
 
-              <Separator className="w-2 flex items-center justify-center cursor-col-resize group relative hover:opacity-100 transition-opacity">
-                <div className="h-10 w-1 bg-[var(--color-gh-border)] rounded-full group-hover:bg-[#58a6ff] transition-colors" />
-              </Separator>
-            </>
+          {activeSidebar === "files" && (
+            <Separator className="w-2 flex items-center justify-center cursor-col-resize group relative hover:opacity-100 transition-opacity flex-shrink-0">
+              <div className="h-10 w-1 bg-[#30363d] rounded-full group-hover:bg-[#58a6ff] transition-colors" />
+            </Separator>
           )}
 
           {/* Code Editor Panel */}
-          <Panel className="h-full px-1 min-w-[200px]">
-            <div className="h-full bg-[#0d1117] rounded-xl border border-[var(--color-gh-border)] overflow-hidden shadow-sm flex flex-col pt-0">
+          <Panel defaultSize={57} minSize={20} className="h-full min-w-[200px]">
+            <div className="h-full bg-[#0d1117] rounded-xl border border-[#30363d] overflow-hidden shadow-sm flex flex-col pt-0">
               <CodeEditor />
             </div>
           </Panel>
 
-          {/* Chat Panel */}
+          {/* Chat Panel Segment */}
           {showChat && (
-            <>
-              <Separator className="w-2 flex items-center justify-center cursor-col-resize group relative hover:opacity-100 transition-opacity">
-                <div className="h-10 w-1 bg-[var(--color-gh-border)] rounded-full group-hover:bg-[#58a6ff] transition-colors" />
-              </Separator>
-              
-              <Panel defaultSize={30} minSize={20} className="h-full pl-1">
-                <div className="h-full bg-[#0d1117] rounded-xl border border-[var(--color-gh-border)] overflow-hidden shadow-sm flex flex-col">
-                  <ChatPanel
-                    repoId={repoId}
-                    messages={messages}
-                    input={input}
-                    setInput={setInput}
-                    sendMessage={sendMessage}
-                    loading={loading}
-                  />
-                </div>
-              </Panel>
-            </>
+            <Separator className="w-2 flex items-center justify-center cursor-col-resize group relative hover:opacity-100 transition-opacity flex-shrink-0">
+              <div className="h-10 w-1 bg-[#30363d] rounded-full group-hover:bg-[#58a6ff] transition-colors" />
+            </Separator>
+          )}
+          
+          {showChat && (
+            <Panel defaultSize={25} minSize={15} className="h-full pl-1">
+              <div className="h-full bg-[#0d1117] rounded-xl border border-[#30363d] overflow-hidden shadow-sm flex flex-col">
+                <ChatPanel
+                  repoId={repoId as string}
+                  messages={messages}
+                  input={input}
+                  setInput={setInput}
+                  sendMessage={sendMessage}
+                  loading={loading}
+                />
+              </div>
+            </Panel>
           )}
         </Group>
       </div>

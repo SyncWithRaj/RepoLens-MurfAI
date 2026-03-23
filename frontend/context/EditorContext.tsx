@@ -41,7 +41,11 @@ export const EditorProvider = ({ children }: any) => {
   };
 
   // Backwards compatible setter
-  const setEditorState = (state: EditorTab) => {
+  const setEditorState = (state: EditorTab | null) => {
+    if (!state) {
+      setActiveTabId(null);
+      return;
+    }
     openTab(state);
   };
 
