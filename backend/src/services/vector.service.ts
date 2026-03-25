@@ -11,6 +11,7 @@ const getVectorStore = async () => {
     embeddingModel,
     {
       url: process.env.QDRANT_URL!,
+      apiKey: process.env.QDRANT_API_KEY!,
       collectionName: "repo_entities",
       contentPayloadKey: "pageContent",
       metadataPayloadKey: "metadata"

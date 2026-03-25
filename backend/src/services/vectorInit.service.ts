@@ -8,7 +8,8 @@ export class VectorInitService {
 
     constructor() {
         this.client = new QdrantClient({
-            url: process.env.QDRANT_URL || "http://localhost:6333"
+            url: process.env.QDRANT_URL || "http://localhost:6333",
+            apiKey: process.env.QDRANT_API_KEY!
         })
     }
 
@@ -20,8 +21,18 @@ export class VectorInitService {
         )
 
         if (exists) {
+            // Ensure payload index exists even if collection already exists
+            try {
+                await this.client.createPayloadIndex(COLLECTION, {
+                    field_name: "metadata.fingerprint",
+                    field_schema: "keyword",
+                    wait: true
+                });
+            } catch (e: any) {
+                console.log("Index creation skipped/failed:", e.message);
+            }
             return {
-                message: "Collection already exists"
+                message: "Collection already exists, ensured payload index is present"
             }
         }
 
@@ -32,8 +43,14 @@ export class VectorInitService {
             }
         });
 
+        await this.client.createPayloadIndex(COLLECTION, {
+            field_name: "metadata.fingerprint",
+            field_schema: "keyword",
+            wait: true
+        });
+
         return {
-            message: "repo_entities collection created"
+            message: "repo_entities collection and payload index created"
         }
     }
 }

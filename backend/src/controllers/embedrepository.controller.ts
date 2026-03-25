@@ -24,8 +24,8 @@ export const embedRepositoryController = async(req: Request, res: Response) =>{
 
         return res.status(500).json({
             success:false,
-            message: "embedding Failes",
-            error: error.mssage,
+            message: "embedding Failed",
+            error: error.message || error.toString(),
         })
     }
 }

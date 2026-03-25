@@ -16,9 +16,9 @@ export class VectorController {
         } catch (error: any) {
 
             console.error(error);
-
             res.status(500).json({
-                message: "Vector collection initialization failed"
+                message: "Vector collection initialization failed",
+                error: error.message || error.toString()
             });
         }
     };

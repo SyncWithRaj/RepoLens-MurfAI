@@ -179,6 +179,7 @@ export const deleteRepository = async (req: Request, res: Response) => {
 
         const qdrant = new QdrantClient({
             url: process.env.QDRANT_URL || "http://localhost:6333",
+            apiKey: process.env.QDRANT_API_KEY!,
         });
 
         const COLLECTION = "repo_entities";
