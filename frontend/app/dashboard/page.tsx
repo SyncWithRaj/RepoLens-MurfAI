@@ -112,7 +112,7 @@ export default function Dashboard() {
                        </div>
                        <input
                            type="text"
-                           placeholder="https://github.com/owner/repo"
+                           placeholder="https://github.com/owner/repo.git"
                            value={githubUrl}
                            onChange={(e) => setGithubUrl(e.target.value)}
                            className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-[#010409]/80 backdrop-blur-sm border border-[#30363d] text-white focus:outline-none focus:border-[#58a6ff] focus:ring-1 focus:ring-[#58a6ff] transition-all shadow-inner placeholder-[#484f58]"
