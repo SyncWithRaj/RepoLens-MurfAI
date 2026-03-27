@@ -1,9 +1,9 @@
-# 🚀 RepoLens AI Engine & MurfAI
+# RepoLens AI Engine - Understand your Codebase faster than ever!
 
 ![RepoLens AI Engine](https://img.shields.io/badge/RepoLens-AI_Engine-58a6ff?style=for-the-badge)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=for-the-badge&logo=next.js)
 ![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=nodedotjs)
-![Mongoose & MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-4DB33D?style=for-the-badge&logo=mongodb)
+![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-4DB33D?style=for-the-badge&logo=mongodb)
 ![Google Gemini](https://img.shields.io/badge/Google_Gemini-AI-4285F4?style=for-the-badge&logo=google)
 ![Qdrant](https://img.shields.io/badge/Qdrant-Vector_DB-FF5252?style=for-the-badge)
 
@@ -11,12 +11,14 @@
 
 RepoLens utilizes advanced AI vector embeddings to visually map and comprehend your entire repository. Stop reading thousands of lines of code—start asking questions and get exact, contextual explanations instantly. Built for High-Velocity Teams, Engineers, Architects, and New Hires to navigate, analyze, and comprehend massive codebases without opening a single IDE window.
 
+> **Supported Languages:** Currently supports **JavaScript**, **TypeScript**, **CSS**, and **HTML** repositories. We built the extraction pipeline to be highly modular and will extend support to more languages very soon!
+
 ---
 
 ## ✨ Key Features
 
 1. **Intelligent Indexing & Parsing**
-   Paste your repository URL and let our cluster extract, parse, and embed every function and structure using Abstract Syntax Trees (ASTs).
+   Paste your repository URL and let our cluster extract, parse, and embed every function and structure using Abstract Syntax Trees (ASTs). Supports JS, TS, HTML, and CSS environments.
 2. **Contextual Chat AI**
    Ask natural language questions like "Where is the authentication logic?" and get exact code snippets, file references, and architectural explanations contextually synthesized via **RAG** (Retrieval-Augmented Generation).
 3. **Unified Workspace & Advanced Graph Visualization**
@@ -27,22 +29,32 @@ RepoLens utilizes advanced AI vector embeddings to visually map and comprehend y
 5. **Vector-Powered Code Search**
    Replaces legacy regex and raw text indexing with a high-dimensional vector space. RepoLens understands the *intent* behind the code, instantly leaping across modules and microservices to give you factual architectural answers.
 6. **Security & Sandboxing**
-   Zero data retention. Your codebase is parsed in-memory, embedded securely into the vector database, and never utilized for general LLM training.
+   Zero data retention on disk. Your codebase is parsed ephemerally, embedded securely into the vector database, and never utilized for general LLM training.
 
 ---
 
-## 🏗 System Workflow & Architecture Pipeline
+## 🏗 System Design & Architecture
 
-Our seamless pipeline is designed to take you from a Git clone to intelligent contextual answers in seconds. This ensures accuracy and real-time comprehension:
+Our architecture is expressly designed to provide high-speed semantic search, interactive visualization, and conversational code analysis while keeping server overhead to an absolute minimum.
 
-**`Login` ➔ `Paste Repo Link` ➔ `Clone` ➔ `Parse` ➔ `Embed` ➔ `Chat / Call with Codebase`**
+### The Challenge: Storage & Disk Bottlenecks
+In early iterations, cloning remote repositories natively onto the server's disk to serve files and feed the codebase into an AI caused critical **storage bottlenecks**. Storing raw files persistently on a production filesystem becomes impossible to scale when numerous users are processing massive monorepos. 
 
-1. **Login**: Securely authenticate into the platform.
-2. **Paste Repo Link**: Provide the specific GitHub repository URL you wish to analyze.
-3. **Clone**: The backend isolates and securely clones the repository into a temporary workspace.
-4. **Parse**: We generate Abstract Syntax Trees (ASTs) for all files to deeply understand the architecture properly, effectively separating components, functions, and classes.
-5. **Embed**: High-dimensional vectors are generated from the AST nodes and securely stored into the **Qdrant Vector Database**.
-6. **Chat / Call with Codebase**: Retrieve architectural context! Your queries (text or voice) are vector-matched, and the LLM synthesizes a factual response streamed back to your UI or seamlessly spoken via our low-latency voice pipeline.
+### Our Infrastructure Solution: Ephemeral Parsing & State Persistence
+To resolve disk bloat, we overhauled the system workflow to utilize an **ephemeral cloning pipeline** alongside **robust MongoDB data models**.
+
+**Workflow Pipeline:**
+**`Login` ➔ `Paste Repo Link` ➔ `Clone to /tmp` ➔ `AST Parse` ➔ `Persist Metadata to DB` ➔ `Delete Clone` ➔ `Chat/Call Contextually`**
+
+1. **Ephemeral Clone**: When a user inputs a repository link, the server securely clones the repository into an isolated, temporary `/tmp` environment.
+2. **AST Parsing Validation**: We parse support files (JavaScript, TypeScript, CSS, HTML), generating full Abstract Syntax Trees (ASTs). This gives the system a deterministic breakdown of all modules, functions, classes, and their relationships.
+3. **Smart Database Modeling (MongoDB)**: Instead of keeping the file on disk, we serialize vital repository data into strict MongoDB Models:
+   - **`File Tree & Contents Model`**: We store the entire hierarchical file tree and the text contents of the files directly in MongoDB. *Why?* So our frontend Monaco Code Editor and file explorer can instantly retrieve and display code via an API endpoint, completely eliminating the need to serve the file from the server's disk.
+   - **`Code Entities & Relationships Model`**: The extracted relationships between files and functions are persisted in MongoDB. *Why?* To power our interactive 2D Force-Graph visualization in real-time. Storing these node-links in the database avoids having to repetitively re-parse ASTs every time the user opens the visualizer.
+   - **`Chat History & Profiles Model`**: Retains user sessions, settings, and complex previous AI interactions.
+4. **Vector Embedding (Qdrant)**: The distilled AST node representations are converted into high-dimensional vectors and securely sent to our **Qdrant Vector Database**.
+5. **Garbage Collection (Cleanup)**: Immediately after extraction and DB serialization, the physical repository stored in `/tmp` is wiped clean. This strictly confines storage to databases and vector-stores, saving massive amounts of block storage on our production servers.
+6. **Retrieval-Augmented Generation (RAG)**: When a user asks a question, we query Qdrant to find semantically relevant code chunks and map them back to our MongoDB structural records to construct a highly factual prompt. The Gemini LLM then streams the explanation to the chat UI or routes it through the AssemblyAI / MurfAI voice pipeline.
 
 ---
 
@@ -60,8 +72,8 @@ Our seamless pipeline is designed to take you from a Git clone to intelligent co
 ### Backend (Core Processing & API)
 - **Framework**: **Node.js** with **Express** (written in **TypeScript**)
 - **Authentication**: **Passport.js** (GitHub OAuth2 via `passport-github2`)
-- **Database**: **MongoDB** with **Mongoose** (user profiles and chat history tracking)
-- **Git & AST Processing**: `simple-git` (repository management), `ts-morph` (TypeScript AST generation).
+- **Database**: **MongoDB** with **Mongoose** (user profiles, file trees, relationships, chat history)
+- **Git & AST Processing**: `simple-git` (ephemeral cloning), `ts-morph` (AST generation).
 
 ### AI & Machine Learning Infrastructure
 - **LLM Engine**: **Google Gemini AI** (`@google/generative-ai`, `@langchain/google-genai`)
@@ -77,9 +89,9 @@ Our seamless pipeline is designed to take you from a Git clone to intelligent co
 Ensure you have **Node.js 20+**, **MongoDB**, and **Docker** installed on your system.
 
 ### 0. Clone repository
-   ```bash
-   git clone https://github.com/raj-ribadiya/repolens-murfai.git
-   ```
+```bash
+git clone https://github.com/raj-ribadiya/repolens-murfai.git
+```
 
 ### 1. Set Up Qdrant Vector DB via Docker Compose 🐳 
 Instead of downloading or configuring Qdrant manually through the Docker Engine or Docker Desktop UI, you can spin it up directly and easily using our included `docker-compose.yml` file.
@@ -88,7 +100,7 @@ Instead of downloading or configuring Qdrant manually through the Docker Engine 
    ```bash
    cd repolens-murfai
    ```
-2. Start the Qdrant container in detached mode:
+2. Start the Qdrant container in detached mode but first uncomment the code in docker-compose file:
    ```bash
    docker-compose up -d
    ```
@@ -107,7 +119,6 @@ Instead of downloading or configuring Qdrant manually through the Docker Engine 
    Create a `.env` file in the `backend` directory. Ensure you include your database and ML keys (MongoDB URL, Gemini API Key, Qdrant URL, Assembly AI key, Murf AI key, Session Secrets, etc.).
 
    ```bash
-   
    GITHUB_CLIENT_ID=your_github_client_id
    GITHUB_CLIENT_SECRET=your_github_client_secret
    JWT_SECRET=supersecretkey
@@ -153,7 +164,7 @@ repolens-murfai/
 │   │   ├── config/          # Configurations (Passport, DB)
 │   │   ├── controllers/     # API logic (Repository, Query, Authentication)
 │   │   ├── middlewares/     # Error Handlers, Auth Protection
-│   │   ├── models/          # MongoDB Schemas (User, ChatHistory)
+│   │   ├── models/          # MongoDB Schemas (User, ChatHistory, FileTree, CodeEntities)
 │   │   ├── modules/         # Parsing and Scanning logic written here (astParser, indexing)
 │   │   ├── routes/          # Express Routes (/api/v1/...)
 │   │   ├── services/        # Core business & AI logic (LangChain, Qdrant integration)
@@ -163,7 +174,7 @@ repolens-murfai/
 │
 └── frontend/
     ├── app/                 # Next.js 16 App Router (Landing, Chat, Graph, Layout)
-    ├── components/          # Reusable UI Components (ChatPanel, GraphView, etc.)
+    ├── components/          # Reusable UI Components (ChatPanel, GraphView, Editor)
     ├── lib/                 # Utility functions & axios instances
     └── package.json
 ```
@@ -172,7 +183,7 @@ repolens-murfai/
 
 ## 🤝 Contributing
 
-Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/yourusername/repolens-murfai/issues). 
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/raj-ribadiya/repolens-murfai/issues). 
 
 1. Fork the Project.
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`).
