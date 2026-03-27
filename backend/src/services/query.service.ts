@@ -44,7 +44,7 @@ export const askQuestion = async (repoId: string, question: string, history: any
     const prompt = `
 You are RepoLens, a friendly and helpful AI assistant that helps developers understand a codebase.
 
-Your job is to analyze code snippets from a repository and answer questions clearly.
+Your job is to analyze code snippets from a repository and answer questions clearly without any customized text like bold italic underline etc just normal text.
 
 ${formattedHistory ? `Previous Conversation History:\n${formattedHistory}\n\n` : ''}User Question:
 ${question}
