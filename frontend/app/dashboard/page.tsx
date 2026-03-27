@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { GitBranch, Box, Loader2, Play, Trash2, Github, MessageSquare, Plus } from "lucide-react";
+import { GitBranch, Box, Loader2, Play, Trash2, Github, MessageSquare, Plus, Info } from "lucide-react";
 import api from "@/lib/axios";
 
 export default function Dashboard() {
@@ -12,16 +12,27 @@ export default function Dashboard() {
     const [githubUrl, setGithubUrl] = useState("");
     const [loading, setLoading] = useState(false);
     const [embeddingRepo, setEmbeddingRepo] = useState<string | null>(null);
+    const [indexingRepo, setIndexingRepo] = useState<string | null>(null);
+    const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
-    const fetchRepos = async () => {
+    const fetchRepos = useCallback(async () => {
         try {
             const res = await api.get("/repos");
-            setRepos(res.data.repos || []);
+            const fetchedRepos = res.data.repos || [];
+            setRepos(fetchedRepos);
+
+            // Stop polling if no repos are in indexing state
+            const hasIndexing = fetchedRepos.some((r: any) => r.status === "indexing");
+            if (!hasIndexing && pollingRef.current) {
+                clearInterval(pollingRef.current);
+                pollingRef.current = null;
+                setIndexingRepo(null);
+            }
         } catch (err) {
             console.error("Fetch repos error:", err);
             setRepos([]);
         }
-    };
+    }, []);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -33,6 +44,10 @@ export default function Dashboard() {
             }
         };
         checkAuth();
+
+        return () => {
+            if (pollingRef.current) clearInterval(pollingRef.current);
+        };
     }, []);
 
     const cloneRepo = async () => {
@@ -50,21 +65,29 @@ export default function Dashboard() {
 
     const indexRepo = async (repoId: string) => {
         try {
+            // Optimistic update: immediately set status to indexing
+            setIndexingRepo(repoId);
+            setRepos(prev => prev.map(r =>
+                r._id === repoId ? { ...r, status: "indexing" } : r
+            ));
+
+            // Start polling for status updates
+            if (pollingRef.current) clearInterval(pollingRef.current);
+            pollingRef.current = setInterval(fetchRepos, 3000);
+
             await api.post(`/repos/${repoId}/parse`);
             fetchRepos();
         } catch (err) {
             console.error("Index repo error:", err);
+            fetchRepos(); // Refresh to get actual status on error
         }
     };
 
     const embedRepo = async (repoId: string) => {
         try {
             setEmbeddingRepo(repoId);
-            // 1️⃣ Ensure vector DB exists
             await api.post("/vector/init");
-            // 2️⃣ Run embeddings
             await api.post(`/embed/${repoId}`);
-            // 3️⃣ Redirect to chat
             router.push(`/chat/${repoId}`);
         } catch (err) {
             console.error("Embed repo error:", err);
@@ -97,7 +120,7 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <div className="mb-12 p-8 bg-gradient-to-br from-[#161b22] to-[#0d1117] border border-[#30363d] rounded-2xl shadow-xl relative overflow-hidden group">
+            <div className="mb-8 p-8 bg-gradient-to-br from-[#161b22] to-[#0d1117] border border-[#30363d] rounded-2xl shadow-xl relative overflow-hidden group">
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }}></div>
                 <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-[#2ea043]/10 to-transparent blur-3xl rounded-full pointer-events-none group-hover:from-[#2ea043]/20 transition-all duration-700"></div>
                 
@@ -121,16 +144,35 @@ export default function Dashboard() {
                     <button
                         onClick={cloneRepo}
                         disabled={loading || !githubUrl}
-                        className="bg-[#238636] hover:bg-[#2ea043] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-8 py-3.5 rounded-xl transition-all border border-[rgba(240,246,252,0.1)] whitespace-nowrap shadow-[0_0_15px_rgba(35,134,54,0.2)] hover:shadow-[0_0_25px_rgba(46,160,67,0.4)] flex items-center justify-center min-w-[180px]"
+                        className="cursor-pointer bg-[#238636] hover:bg-[#2ea043] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-8 py-3.5 rounded-xl transition-all border border-[rgba(240,246,252,0.1)] whitespace-nowrap shadow-[0_0_15px_rgba(35,134,54,0.2)] hover:shadow-[0_0_25px_rgba(46,160,67,0.4)] flex items-center justify-center min-w-[180px]"
                     >
                         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Clone Repository"}
                     </button>
                 </div>
             </div>
 
+            {/* Language Support Banner */}
+            <div className="mb-8 p-4 bg-gradient-to-r from-[#161b22] via-[#1c2333] to-[#161b22] border border-[#30363d]/60 rounded-xl relative overflow-hidden animate-fadeIn">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#58a6ff]/5 to-transparent animate-shimmer pointer-events-none"></div>
+                <div className="flex items-start gap-3 relative z-10">
+                    <div className="flex-shrink-0 mt-0.5">
+                        <Info size={18} className="text-[#58a6ff]" />
+                    </div>
+                    <div>
+                        <p className="text-sm text-[#c9d1d9] font-medium">
+                            <span className="text-[#58a6ff] font-semibold">Currently supporting:</span>{" "}
+                            JavaScript, TypeScript, HTML, and CSS repositories.
+                        </p>
+                        <p className="text-xs text-[#8b949e] mt-1">
+                            More languages and frameworks will be supported in future updates. Stay tuned! 🚀
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <div className="space-y-4">
                 {repos.length === 0 ? (
-                    <div className="text-center py-24 px-4 bg-[#0d1117]/50 border-2 border-dashed border-[#30363d]/50 rounded-3xl flex flex-col items-center">
+                    <div className="text-center py-24 px-4 bg-[#0d1117]/50 border-2 border-dashed border-[#30363d]/50 rounded-3xl flex flex-col items-center animate-fadeIn">
                         <div className="w-16 h-16 rounded-full bg-[#161b22] border border-[#30363d] flex items-center justify-center mb-6 shadow-inner">
                            <GitBranch className="h-8 w-8 text-[#8b949e]" />
                         </div>
@@ -139,10 +181,11 @@ export default function Dashboard() {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 gap-4">
-                      {repos.map((repo) => (
+                      {repos.map((repo, index) => (
                           <div
                               key={repo._id}
-                              className="group bg-[#0d1117] p-6 rounded-2xl border border-[#30363d] flex flex-col md:flex-row justify-between md:items-center gap-6 hover:bg-[#161b22]/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:border-[#8b949e]/50 relative overflow-hidden"
+                              className="group bg-[#0d1117] p-6 rounded-2xl border border-[#30363d] flex flex-col md:flex-row justify-between md:items-center gap-6 hover:bg-[#161b22]/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:border-[#8b949e]/50 relative overflow-hidden animate-fadeInUp"
+                              style={{ animationDelay: `${index * 60}ms` }}
                           >
                               {/* Hover glow line */}
                               <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#58a6ff] to-[#a371f7] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -172,7 +215,7 @@ export default function Dashboard() {
                                   {repo.status === "cloned" && (
                                       <button
                                           onClick={() => indexRepo(repo._id)}
-                                          className="flex items-center gap-2 text-sm bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] hover:text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-sm"
+                                          className="cursor-pointer flex items-center gap-2 text-sm bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] hover:text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-sm"
                                       >
                                           <Play size={16} />
                                           Index Architecture
@@ -187,17 +230,20 @@ export default function Dashboard() {
                                   )}
 
                                   {repo.status === "indexing" && (
-                                      <span className="flex items-center gap-2 text-sm text-[#e3b341] font-medium px-4 py-2 bg-[#e3b341]/10 rounded-xl border border-[#e3b341]/20">
+                                      <button
+                                          disabled
+                                          className="flex items-center gap-2 text-sm text-[#e3b341] font-medium px-5 py-2.5 bg-[#e3b341]/10 rounded-xl border border-[#e3b341]/20 cursor-not-allowed opacity-80"
+                                      >
                                           <Loader2 className="w-4 h-4 animate-spin" />
                                           Indexing...
-                                      </span>
+                                      </button>
                                   )}
 
                                   {repo.status === "indexed" && (
                                       <>
                                           <button
                                               onClick={() => router.push(`/graph/${repo._id}`)}
-                                              className="flex items-center gap-2 text-sm bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] hover:text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-sm"
+                                              className="cursor-pointer flex items-center gap-2 text-sm bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] hover:text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-sm"
                                           >
                                               <Box size={16} />
                                               Visualize Network
@@ -205,7 +251,7 @@ export default function Dashboard() {
                                           <button
                                               onClick={() => embedRepo(repo._id)}
                                               disabled={embeddingRepo === repo._id}
-                                              className="flex items-center gap-2 text-sm bg-[#58a6ff] hover:bg-[#1f6feb] border border-[rgba(240,246,252,0.1)] text-white font-semibold px-5 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(88,166,255,0.2)] hover:shadow-[0_0_20px_rgba(88,166,255,0.4)] disabled:opacity-50"
+                                              className="cursor-pointer flex items-center gap-2 text-sm bg-[#58a6ff] hover:bg-[#1f6feb] border border-[rgba(240,246,252,0.1)] text-white font-semibold px-5 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(88,166,255,0.2)] hover:shadow-[0_0_20px_rgba(88,166,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
                                           >
                                               {embeddingRepo === repo._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare size={16} />}
                                               {embeddingRepo === repo._id ? "Preparing Agent..." : "Chat with Codebase"}
@@ -215,7 +261,8 @@ export default function Dashboard() {
 
                                   <button
                                       onClick={() => deleteRepo(repo._id)}
-                                      className="flex justify-center items-center w-10 h-10 bg-[#21262d] hover:bg-[#da3633] text-[#8b949e] hover:text-white border border-[#30363d] hover:border-transparent rounded-xl transition-all shadow-sm group/btn ml-2"
+                                      disabled={repo.status === "indexing"}
+                                      className="cursor-pointer flex justify-center items-center w-10 h-10 bg-[#21262d] hover:bg-[#da3633] text-[#8b949e] hover:text-white border border-[#30363d] hover:border-transparent rounded-xl transition-all shadow-sm group/btn ml-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#21262d] disabled:hover:text-[#8b949e]"
                                       title="Delete Repository"
                                   >
                                       <Trash2 size={16} className="group-hover/btn:scale-110 transition-transform" />

@@ -4,7 +4,52 @@ import { useEditor } from "@/context/EditorContext";
 import api from "@/lib/axios";
 import { getLanguage } from "@/utils/getLanguage";
 import { useRef, useEffect, useState } from "react";
-import { Send, Bot, User, Code2, Mic, Square, Loader2, Phone, MessageSquare, PhoneOff } from "lucide-react";
+import { Send, Bot, User, Code2, Mic, Square, Loader2, Phone, MessageSquare, PhoneOff, Trash2 } from "lucide-react";
+
+// Typewriter hook for streaming effect
+function useTypewriter(text: string, isActive: boolean, speed: number = 12) {
+  const [displayed, setDisplayed] = useState("");
+  const [isDone, setIsDone] = useState(false);
+
+  useEffect(() => {
+    if (!isActive) {
+      setDisplayed(text);
+      setIsDone(true);
+      return;
+    }
+
+    setDisplayed("");
+    setIsDone(false);
+    let i = 0;
+
+    const interval = setInterval(() => {
+      i += 3; // 3 chars per tick for natural speed
+      if (i >= text.length) {
+        setDisplayed(text);
+        setIsDone(true);
+        clearInterval(interval);
+      } else {
+        setDisplayed(text.slice(0, i));
+      }
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [text, isActive, speed]);
+
+  return { displayed, isDone };
+}
+
+// Individual message component with typewriter support
+function AssistantMessage({ content, shouldStream }: { content: string; shouldStream: boolean }) {
+  const { displayed, isDone } = useTypewriter(content, shouldStream);
+
+  return (
+    <span>
+      {displayed}
+      {shouldStream && !isDone && <span className="animate-blink text-[#58a6ff] ml-0.5">▌</span>}
+    </span>
+  );
+}
 
 export default function ChatPanel({
   repoId,
@@ -15,6 +60,9 @@ export default function ChatPanel({
   sendMessage,
   addCallMessages,
   loading,
+  streamingIndex,
+  onStreamComplete,
+  onDeleteChat,
 }: any) {
   const [activeTab, setActiveTab] = useState<"chat" | "call">("chat");
   const [callState, setCallState] = useState<"idle" | "listening" | "processing" | "speaking">("idle");
@@ -40,6 +88,14 @@ export default function ChatPanel({
   useEffect(() => {
     scrollToBottom();
   }, [chatMessages, callMessages, loading, activeTab]);
+
+  // Auto-scroll during typewriter streaming
+  useEffect(() => {
+    if (streamingIndex !== null) {
+      const interval = setInterval(scrollToBottom, 100);
+      return () => clearInterval(interval);
+    }
+  }, [streamingIndex]);
 
   const openReference = async (ref: any) => {
     try {
@@ -96,7 +152,7 @@ export default function ChatPanel({
       };
 
       mediaRecorder.onstop = async () => {
-        if (callStateRef.current === "idle") return; // Manually killed
+        if (callStateRef.current === "idle") return;
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
         stream.getTracks().forEach((track) => track.stop());
         
@@ -204,6 +260,17 @@ export default function ChatPanel({
     }
   };
 
+  const handleDeleteChat = () => {
+    const type = activeTab;
+    const confirmMsg = type === "chat"
+      ? "Are you sure you want to delete all chat history? This cannot be undone."
+      : "Are you sure you want to delete all call history? This cannot be undone.";
+    
+    if (confirm(confirmMsg)) {
+      onDeleteChat(type);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-[#0d1117] relative">
       <div className="border-b border-[#30363d] bg-[#161b22]/90 backdrop-blur-md sticky top-0 z-10 flex flex-col shadow-sm">
@@ -216,6 +283,18 @@ export default function ChatPanel({
             {callState === "listening" && <div className="text-xs text-[#ff5858] font-semibold animate-pulse mr-2 flex items-center gap-1"><Mic size={12}/> Recording</div>}
             {callState === "processing" && <div className="text-xs text-[#58a6ff] font-semibold animate-pulse mr-2 flex items-center gap-1"><Loader2 size={12} className="animate-spin"/> Thinking</div>}
             {callState === "speaking" && <div className="text-xs text-[#a371f7] font-semibold animate-pulse mr-2 flex items-center gap-1"><Bot size={12}/> Speaking</div>}
+            
+            {/* Delete Chat Button */}
+            {activeMessages.length > 0 && (
+              <button
+                onClick={handleDeleteChat}
+                className="cursor-pointer p-1.5 rounded-lg text-[#8b949e] hover:text-[#f85149] hover:bg-[#f85149]/10 transition-all"
+                title={`Clear ${activeTab} history`}
+              >
+                <Trash2 size={14} />
+              </button>
+            )}
+            
             <div className={`w-2 h-2 rounded-full shadow-[0_0_8px_currentColor] animate-pulse ${
                 callState === "listening" ? "text-[#ff5858] bg-[#ff5858]" : 
                 callState === "processing" ? "text-[#58a6ff] bg-[#58a6ff]" : 
@@ -228,14 +307,14 @@ export default function ChatPanel({
         <div className="flex border-t border-[#30363d]/50">
           <button 
             onClick={() => setActiveTab("chat")} 
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase transition-colors ${activeTab === "chat" ? "text-[#58a6ff] border-b-2 border-[#58a6ff] bg-[#0d1117]" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
+            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase transition-colors ${activeTab === "chat" ? "text-[#58a6ff] border-b-2 border-[#58a6ff] bg-[#0d1117]" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
           >
             <MessageSquare size={14} />
             Chat
           </button>
           <button 
             onClick={() => setActiveTab("call")} 
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase transition-colors ${activeTab === "call" ? "text-[#2ea043] border-b-2 border-[#2ea043] bg-[#0d1117]" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
+            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase transition-colors ${activeTab === "call" ? "text-[#2ea043] border-b-2 border-[#2ea043] bg-[#0d1117]" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
           >
             <Phone size={14} />
             Call
@@ -243,7 +322,7 @@ export default function ChatPanel({
         </div>
       </div>
 
-      <div className={`flex-1 overflow-y-auto p-4 space-y-6 bg-[#0d1117] custom-scrollbar relative z-0 ${activeTab === "call" ? "" : ""}`}>
+      <div className={`flex-1 overflow-y-auto p-4 space-y-6 bg-[#0d1117] custom-scrollbar relative z-0`}>
         <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-gradient-to-l from-[#58a6ff]/5 to-transparent blur-3xl pointer-events-none -z-10"></div>
         
         {activeMessages.length === 0 ? (
@@ -255,48 +334,59 @@ export default function ChatPanel({
             <p className="text-sm text-[#8b949e]">{activeTab === "chat" ? "Ask for architecture details, exact files, or component logic." : "I'm listening and ready to dive into the code with you."}</p>
           </div>
         ) : (
-          activeMessages.map((msg: any, i: number) => (
-            <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"}`}>
-              <div
-                className={`max-w-[90%] md:max-w-[85%] rounded-2xl overflow-hidden shadow-sm ${
-                  msg.role === "user"
-                    ? "bg-[#21262d] border border-[#30363d]/50 rounded-tr-sm"
-                    : "bg-[#161b22] border border-[#30363d] rounded-tl-sm shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
-                }`}
-              >
-                <div className={`px-4 py-2 text-[11px] font-bold tracking-wide uppercase flex items-center gap-2 ${
-                  msg.role === "user" ? "text-[#c9d1d9] justify-end" : "text-[#58a6ff] border-b border-[#30363d]/50 bg-[#0d1117]/50"
-                }`}>
-                  {msg.role === "assistant" && <Bot size={14} className="text-[#58a6ff]" />}
-                  {msg.role === "user" ? "You" : "RepoLens"}
-                  {msg.role === "user" && <User size={14} className="text-[#8b949e]" />}
-                </div>
-                <div className="p-4 text-[13px] sm:text-sm text-[#c9d1d9] whitespace-pre-wrap leading-relaxed font-sans">
-                  {msg.content}
-                </div>
-              </div>
+          activeMessages.map((msg: any, i: number) => {
+            const isStreamingThis = activeTab === "chat" && msg.role === "assistant" && i === streamingIndex;
 
-              {msg.references && msg.references.length > 0 && (
-                <div className="mt-2 space-y-1.5 w-full max-w-[85%] self-start ml-2">
-                  <span className="text-[10px] font-bold text-[#8b949e] uppercase tracking-wider block mb-1">References</span>
-                  <div className="flex flex-wrap gap-2">
-                     {msg.references.map((ref: any, idx: number) => (
-                       <div
-                         key={idx}
-                         onClick={() => openReference(ref)}
-                         className="inline-flex items-center gap-1.5 text-[11px] bg-[#161b22] border border-[#30363d] hover:border-[#58a6ff] hover:bg-[#58a6ff]/10 rounded-lg px-2.5 py-1.5 text-[#c9d1d9] cursor-pointer transition-all shadow-sm group"
-                         title="Click to view in editor"
-                       >
-                         <Code2 className="w-3.5 h-3.5 text-[#58a6ff] group-hover:scale-110 transition-transform" />
-                         <span className="font-mono">{ref.file.split('/').pop()}</span> 
-                         <span className="text-[#8b949e] font-mono">L{ref.startLine}</span>
-                       </div>
-                     ))}
+            return (
+              <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"} animate-fadeIn`}>
+                <div
+                  className={`max-w-[90%] md:max-w-[85%] rounded-2xl overflow-hidden shadow-sm ${
+                    msg.role === "user"
+                      ? "bg-[#21262d] border border-[#30363d]/50 rounded-tr-sm"
+                      : "bg-[#161b22] border border-[#30363d] rounded-tl-sm shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
+                  }`}
+                >
+                  <div className={`px-4 py-2 text-[11px] font-bold tracking-wide uppercase flex items-center gap-2 ${
+                    msg.role === "user" ? "text-[#c9d1d9] justify-end" : "text-[#58a6ff] border-b border-[#30363d]/50 bg-[#0d1117]/50"
+                  }`}>
+                    {msg.role === "assistant" && <Bot size={14} className="text-[#58a6ff]" />}
+                    {msg.role === "user" ? "You" : "RepoLens"}
+                    {msg.role === "user" && <User size={14} className="text-[#8b949e]" />}
+                  </div>
+                  <div className="p-4 text-[13px] sm:text-sm text-[#c9d1d9] whitespace-pre-wrap leading-relaxed font-sans">
+                    {msg.role === "assistant" ? (
+                      <AssistantMessage
+                        content={msg.content}
+                        shouldStream={isStreamingThis}
+                      />
+                    ) : (
+                      msg.content
+                    )}
                   </div>
                 </div>
-              )}
-            </div>
-          ))
+
+                {msg.references && msg.references.length > 0 && (
+                  <div className="mt-2 space-y-1.5 w-full max-w-[85%] self-start ml-2">
+                    <span className="text-[10px] font-bold text-[#8b949e] uppercase tracking-wider block mb-1">References</span>
+                    <div className="flex flex-wrap gap-2">
+                       {msg.references.map((ref: any, idx: number) => (
+                        <div
+                          key={idx}
+                          onClick={() => openReference(ref)}
+                          className="cursor-pointer inline-flex items-center gap-1.5 text-[11px] bg-[#161b22] border border-[#30363d] hover:border-[#58a6ff] hover:bg-[#58a6ff]/10 rounded-lg px-2.5 py-1.5 text-[#c9d1d9] transition-all shadow-sm group"
+                          title="Click to view in editor"
+                        >
+                          <Code2 className="w-3.5 h-3.5 text-[#58a6ff] group-hover:scale-110 transition-transform" />
+                          <span className="font-mono">{ref.file.split('/').pop()}</span> 
+                          <span className="text-[#8b949e] font-mono">L{ref.startLine}</span>
+                        </div>
+                       ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
 
         {loading && (
@@ -338,7 +428,7 @@ export default function ChatPanel({
               <button
                 onClick={sendMessage}
                 disabled={loading || !input.trim()}
-                className="bg-[#238636] hover:bg-[#2ea043] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-[11px] px-4 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm"
+                className="cursor-pointer bg-[#238636] hover:bg-[#2ea043] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-[11px] px-4 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm"
               >
                 Send <Send size={12} />
               </button>
@@ -353,7 +443,7 @@ export default function ChatPanel({
             <>
               <button
                  onClick={startListeningPhase}
-                 className="w-20 h-20 rounded-full flex items-center justify-center transition-all bg-[#2ea043] border border-[#2ea043] text-white hover:bg-[#238636] hover:scale-105 shadow-[0_0_15px_rgba(46,160,67,0.3)]"
+                 className="cursor-pointer w-20 h-20 rounded-full flex items-center justify-center transition-all bg-[#2ea043] border border-[#2ea043] text-white hover:bg-[#238636] hover:scale-105 shadow-[0_0_15px_rgba(46,160,67,0.3)]"
               >
                 <Phone size={32} />
               </button>
@@ -367,7 +457,7 @@ export default function ChatPanel({
                   {callState === "listening" && (
                     <button
                        onClick={triggerSendAudio}
-                       className="w-16 h-16 rounded-full flex items-center justify-center transition-all bg-[#58a6ff] text-white shadow-[0_4px_15px_rgba(88,166,255,0.4)] hover:bg-[#3186e8] hover:scale-105"
+                       className="cursor-pointer w-16 h-16 rounded-full flex items-center justify-center transition-all bg-[#58a6ff] text-white shadow-[0_4px_15px_rgba(88,166,255,0.4)] hover:bg-[#3186e8] hover:scale-105"
                        title="Send Audio"
                     >
                        <Send size={24} />
@@ -394,7 +484,7 @@ export default function ChatPanel({
 
                   <button
                      onClick={cleanupCall}
-                     className="w-16 h-16 rounded-full flex items-center justify-center transition-all bg-[#ff5858] text-white shadow-[0_4px_15px_rgba(255,88,88,0.4)] hover:bg-[#d73a49] hover:scale-105"
+                     className="cursor-pointer w-16 h-16 rounded-full flex items-center justify-center transition-all bg-[#ff5858] text-white shadow-[0_4px_15px_rgba(255,88,88,0.4)] hover:bg-[#d73a49] hover:scale-105"
                      title="End Call"
                   >
                      <PhoneOff size={24} />

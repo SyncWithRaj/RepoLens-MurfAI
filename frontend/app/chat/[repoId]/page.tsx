@@ -33,6 +33,7 @@ export default function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [repoValid, setRepoValid] = useState<boolean | null>(null);
+  const [streamingIndex, setStreamingIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const checkRepo = async () => {
@@ -104,7 +105,12 @@ export default function ChatPage() {
         });
       }
 
-      setChatMessages((prev) => [...prev, aiMsg]);
+      setChatMessages((prev) => {
+        const newMessages = [...prev, aiMsg];
+        // Set streaming index to the new assistant message
+        setStreamingIndex(newMessages.length - 1);
+        return newMessages;
+      });
     } catch {
       setChatMessages((prev) => [
         ...prev,
@@ -113,6 +119,20 @@ export default function ChatPage() {
     }
 
     setLoading(false);
+  };
+
+  const handleDeleteChat = async (type: "chat" | "call") => {
+    try {
+      await api.delete(`/history/${repoId}?type=${type}`);
+      if (type === "chat") {
+        setChatMessages([]);
+      } else {
+        setCallMessages([]);
+      }
+      setStreamingIndex(null);
+    } catch (err) {
+      console.error("Delete chat error:", err);
+    }
   };
 
   const [activeSidebar, setActiveSidebar] = useState<"files" | "none">("files");
@@ -145,7 +165,7 @@ export default function ChatPage() {
       <div className="w-[56px] min-w-[56px] flex flex-col items-center py-5 bg-[#161b22]/80 backdrop-blur-xl rounded-2xl border border-[#30363d]/80 shadow-[0_4px_20px_rgba(0,0,0,0.3)] z-10 space-y-5">
         <button 
           onClick={toggleSidebar}
-          className={`p-2.5 rounded-xl transition-all duration-300 relative group ${activeSidebar === "files" ? "text-white bg-[#58a6ff]/10 shadow-inner border border-[#58a6ff]/30 scale-105" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
+          className={`cursor-pointer p-2.5 rounded-xl transition-all duration-300 relative group ${activeSidebar === "files" ? "text-white bg-[#58a6ff]/10 shadow-inner border border-[#58a6ff]/30 scale-105" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
           title="Explorer"
         >
           <Files size={22} strokeWidth={activeSidebar === "files" ? 2 : 1.5} />
@@ -153,14 +173,14 @@ export default function ChatPage() {
         </button>
         <button 
           onClick={toggleChat}
-          className={`p-2.5 rounded-xl transition-all duration-300 relative group ${showChat ? "text-white bg-[#2ea043]/10 shadow-inner border border-[#2ea043]/30 scale-105" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
+          className={`cursor-pointer p-2.5 rounded-xl transition-all duration-300 relative group ${showChat ? "text-white bg-[#2ea043]/10 shadow-inner border border-[#2ea043]/30 scale-105" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
           title="Chat Panel"
         >
           <MessageSquare size={22} strokeWidth={showChat ? 2 : 1.5} />
           {showChat && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#2ea043] rounded-r-full shadow-[0_0_10px_#2ea043]"></div>}
         </button>
         <div className="flex-grow"></div>
-        <button className="p-2.5 text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d] transition-all duration-300 rounded-xl mb-2 focus:outline-none" title="Settings">
+        <button className="cursor-pointer p-2.5 text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d] transition-all duration-300 rounded-xl mb-2 focus:outline-none" title="Settings">
           <Settings size={22} strokeWidth={1.5} />
         </button>
       </div>
@@ -209,6 +229,9 @@ export default function ChatPage() {
                   sendMessage={sendMessage}
                   addCallMessages={(newMsgs: any[]) => setCallMessages(prev => [...prev, ...newMsgs])}
                   loading={loading}
+                  streamingIndex={streamingIndex}
+                  onStreamComplete={() => setStreamingIndex(null)}
+                  onDeleteChat={handleDeleteChat}
                 />
               </div>
             </Panel>
