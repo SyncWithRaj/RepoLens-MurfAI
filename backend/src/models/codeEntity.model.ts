@@ -5,7 +5,7 @@ export interface ICodeEntity extends Document {
     repoId: mongoose.Types.ObjectId;
     filePath: string;
     name: string;
-    type: "function" | "class" | "method" | "constructor" | "property" | "staticMethod" | "arrow" | "interface" | "typeAlias" | "enum" | "variable" | "import" | "export" | "route";
+    type: "function" | "class" | "method" | "constructor" | "property" | "staticMethod" | "arrow" | "interface" | "typeAlias" | "enum" | "variable" | "import" | "export" | "route" | "css" | "html";
     parameters: string[];
     returnType: string;
     startLine: number;
@@ -34,7 +34,7 @@ const codeEntitySchema = new Schema<ICodeEntity>(
         },
         type: {
             type: String,
-            enum: ["function", "class", "method", "constructor", "property", "staticMethod", "arrow", "interface", "typeAlias", "enum", "variable", "import", "export", "route"],
+            enum: ["function", "class", "method", "constructor", "property", "staticMethod", "arrow", "interface", "typeAlias", "enum", "variable", "import", "export", "route", "css", "html"],
             required: true,
         },
         parameters: {

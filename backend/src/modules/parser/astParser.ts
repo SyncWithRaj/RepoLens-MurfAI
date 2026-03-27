@@ -5,7 +5,7 @@ export type ParsedEntity = {
     repoId: string;
     filePath: string;
     name: string;
-    type: "function" | "class" | "method" | "constructor" | "property" | "staticMethod" | "arrow" | "interface" | "typeAlias" | "enum" | "variable" | "import" | "export" | "route";
+    type: "function" | "class" | "method" | "constructor" | "property" | "staticMethod" | "arrow" | "interface" | "typeAlias" | "enum" | "variable" | "import" | "export" | "route" | "css" | "html";
     parameters: string[];
     returnType: string;
     startLine: number;
