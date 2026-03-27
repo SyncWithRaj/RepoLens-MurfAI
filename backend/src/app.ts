@@ -20,7 +20,7 @@ const app = express();
 // ✅ CORS FIX
 app.use(
   cors({
-    origin: "https://repolens-murfai-1.onrender.com", // ❗ NO trailing slash
+    origin:"https://repo-lens-nine.vercel.app",
     credentials: true,
   })
 );
