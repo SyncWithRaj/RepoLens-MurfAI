@@ -10,7 +10,7 @@ import ChatPanel from "@/components/chat/ChatPanel";
 import { Panel, Group, Separator } from "react-resizable-panels";
 import { Files, MessageSquare, Settings } from "lucide-react";
 import { useEditor } from "@/context/EditorContext";
-import { useToast } from "@/context/ToastContext";
+import toast from "react-hot-toast";
 
 const getLanguage = (filename: string) => {
   const ext = filename.split('.').pop()?.toLowerCase();
@@ -28,7 +28,7 @@ export default function ChatPage() {
   const { repoId } = useParams();
   const router = useRouter();
   const { setEditorState } = useEditor();
-  const { toast } = useToast();
+
 
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [callMessages, setCallMessages] = useState<any[]>([]);

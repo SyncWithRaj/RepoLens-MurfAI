@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { GitBranch, Box, Loader2, Play, Trash2, Github, MessageSquare, Plus, Info } from "lucide-react";
 import api from "@/lib/axios";
-import { useToast } from "@/context/ToastContext";
+import toast from "react-hot-toast";
 
 export default function Dashboard() {
     const router = useRouter();
@@ -15,7 +15,7 @@ export default function Dashboard() {
     const [embeddingRepo, setEmbeddingRepo] = useState<string | null>(null);
     const [indexingRepo, setIndexingRepo] = useState<string | null>(null);
     const pollingRef = useRef<NodeJS.Timeout | null>(null);
-    const { toast } = useToast();
+
 
     const fetchRepos = useCallback(async () => {
         try {

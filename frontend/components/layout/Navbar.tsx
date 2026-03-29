@@ -5,14 +5,14 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { ArrowLeft, Terminal } from "lucide-react";
 import api from "@/lib/axios";
-import { useToast } from "@/context/ToastContext";
+import toast from "react-hot-toast";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const { toast } = useToast();
+
 
   useEffect(() => {
     const handleScroll = () => {

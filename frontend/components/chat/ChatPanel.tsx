@@ -5,7 +5,7 @@ import api from "@/lib/axios";
 import { getLanguage } from "@/utils/getLanguage";
 import { useRef, useEffect, useState } from "react";
 import { Send, Bot, User, Code2, Mic, Loader2, Phone, MessageSquare, PhoneOff, Trash2 } from "lucide-react";
-import { useToast } from "@/context/ToastContext";
+import toast from "react-hot-toast";
 
 // Typewriter hook for streaming effect
 function useTypewriter(text: string, isActive: boolean, speed: number = 12) {
@@ -68,7 +68,7 @@ export default function ChatPanel({
   const [activeTab, setActiveTab] = useState<"chat" | "call">("chat");
   const [callState, setCallState] = useState<"idle" | "listening" | "processing" | "speaking">("idle");
   const callStateRef = useRef<string>("idle");
-  const { toast } = useToast();
+
 
   useEffect(() => {
     callStateRef.current = callState;
