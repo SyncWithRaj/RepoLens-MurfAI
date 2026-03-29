@@ -25,9 +25,20 @@ export default function GraphView({ repoId }: { repoId: string }) {
         
         // ensure format fits force-graph (has target/source identifiers that match node.id)
         if (res.data.success) {
+          // Filter out detached "anonymous_arrow" or redundant "anonymous_function" nodes
+          const filteredNodes = res.data.graph.nodes.filter((n: any) => n.name !== "anonymous_arrow" && n.name !== "anonymous_function");
+          const validNodeIds = new Set(filteredNodes.map((n: any) => n.id));
+          
+          // Only keep links between valid remaining nodes
+          const filteredLinks = res.data.graph.edges.filter((e: any) => {
+             const sourceId = e.source?.id || e.source;
+             const targetId = e.target?.id || e.target;
+             return validNodeIds.has(sourceId) && validNodeIds.has(targetId);
+          });
+
           setGraphData({
-            nodes: res.data.graph.nodes,
-            links: res.data.graph.edges
+            nodes: filteredNodes,
+            links: filteredLinks
           });
           
           // Collapse all files by default so code entities are not visible immediately

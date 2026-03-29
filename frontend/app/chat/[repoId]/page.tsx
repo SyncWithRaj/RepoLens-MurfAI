@@ -166,22 +166,20 @@ export default function ChatPage() {
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-[#a371f7]/5 via-[#58a6ff]/5 to-transparent blur-[120px] rounded-full pointer-events-none mix-blend-screen -z-0"></div>
 
       {/* Activity Bar */}
-      <div className="w-[56px] min-w-[56px] flex flex-col items-center py-5 bg-[#161b22]/80 backdrop-blur-xl rounded-2xl border border-[#30363d]/80 shadow-[0_4px_20px_rgba(0,0,0,0.3)] z-10 space-y-5">
+      <div className="w-[56px] min-w-[56px] flex flex-col items-center py-5 bg-[#161b22]/90 backdrop-blur-xl rounded-2xl border border-[#30363d] shadow-sm z-10 space-y-5">
         <button 
           onClick={toggleSidebar}
-          className={`cursor-pointer p-2.5 rounded-xl transition-all duration-300 relative group ${activeSidebar === "files" ? "text-white bg-[#58a6ff]/10 shadow-inner border border-[#58a6ff]/30 scale-105" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
+          className={`cursor-pointer p-2.5 rounded-xl transition-colors relative group ${activeSidebar === "files" ? "text-[#c9d1d9] bg-[#21262d] shadow-sm border border-[#30363d]" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d] border border-transparent"}`}
           title="Explorer"
         >
-          <Files size={22} strokeWidth={activeSidebar === "files" ? 2 : 1.5} />
-          {activeSidebar === "files" && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#58a6ff] rounded-r-full shadow-[0_0_10px_#58a6ff]"></div>}
+          <Files size={22} strokeWidth={1.5} />
         </button>
         <button 
           onClick={toggleChat}
-          className={`cursor-pointer p-2.5 rounded-xl transition-all duration-300 relative group ${showChat ? "text-white bg-[#2ea043]/10 shadow-inner border border-[#2ea043]/30 scale-105" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
+          className={`cursor-pointer p-2.5 rounded-xl transition-colors relative group ${showChat ? "text-[#c9d1d9] bg-[#21262d] shadow-sm border border-[#30363d]" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d] border border-transparent"}`}
           title="Chat Panel"
         >
-          <MessageSquare size={22} strokeWidth={showChat ? 2 : 1.5} />
-          {showChat && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#2ea043] rounded-r-full shadow-[0_0_10px_#2ea043]"></div>}
+          <MessageSquare size={22} strokeWidth={1.5} />
         </button>
         <div className="flex-grow"></div>
         <button className="cursor-pointer p-2.5 text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d] transition-all duration-300 rounded-xl mb-2 focus:outline-none" title="Settings">
