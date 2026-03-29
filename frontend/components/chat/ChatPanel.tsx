@@ -4,7 +4,7 @@ import { useEditor } from "@/context/EditorContext";
 import api from "@/lib/axios";
 import { getLanguage } from "@/utils/getLanguage";
 import { useRef, useEffect, useState } from "react";
-import { Send, Bot, User, Code2, Mic, Square, Loader2, Phone, MessageSquare, PhoneOff, Trash2 } from "lucide-react";
+import { Send, Bot, User, Code2, Mic, Loader2, Phone, MessageSquare, PhoneOff, Trash2 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 
 // Typewriter hook for streaming effect
@@ -78,6 +78,16 @@ export default function ChatPanel({
   const audioChunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // Silence detection refs
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const silenceStartRef = useRef<number | null>(null);
+  const [audioLevel, setAudioLevel] = useState(0);
+  const SILENCE_THRESHOLD = 15; // Volume level below which counts as silence (0-255)
+  const SILENCE_DURATION = 1500; // ms of continuous silence before auto-send
+  const hasSpokenRef = useRef(false); // Track if user has spoken at all
+
   const { setEditorState } = useEditor();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -117,8 +127,76 @@ export default function ChatPanel({
     }
   };
 
+  const stopSilenceDetection = () => {
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+    silenceStartRef.current = null;
+    hasSpokenRef.current = false;
+    setAudioLevel(0);
+  };
+
+  const startSilenceDetection = (stream: MediaStream) => {
+    try {
+      const audioContext = new AudioContext();
+      const analyser = audioContext.createAnalyser();
+      analyser.fftSize = 512;
+      analyser.smoothingTimeConstant = 0.3;
+      const source = audioContext.createMediaStreamSource(stream);
+      source.connect(analyser);
+
+      audioContextRef.current = audioContext;
+      analyserRef.current = analyser;
+      silenceStartRef.current = null;
+      hasSpokenRef.current = false;
+
+      const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+      const checkAudio = () => {
+        if (callStateRef.current !== "listening" || !analyserRef.current) return;
+
+        analyserRef.current.getByteFrequencyData(dataArray);
+        // Calculate average volume
+        let sum = 0;
+        for (let i = 0; i < dataArray.length; i++) sum += dataArray[i];
+        const avg = sum / dataArray.length;
+
+        setAudioLevel(avg);
+
+        if (avg > SILENCE_THRESHOLD) {
+          // User is speaking
+          hasSpokenRef.current = true;
+          silenceStartRef.current = null;
+        } else if (hasSpokenRef.current) {
+          // Silence detected AFTER user has spoken
+          if (!silenceStartRef.current) {
+            silenceStartRef.current = Date.now();
+          } else if (Date.now() - silenceStartRef.current >= SILENCE_DURATION) {
+            // Enough silence — auto-send
+            console.log("Silence detected — auto-sending audio");
+            triggerSendAudio();
+            return; // Stop the loop
+          }
+        }
+
+        animFrameRef.current = requestAnimationFrame(checkAudio);
+      };
+
+      animFrameRef.current = requestAnimationFrame(checkAudio);
+    } catch (err) {
+      console.error("Silence detection setup failed:", err);
+    }
+  };
+
   const cleanupCall = () => {
     console.log("Call Status: CALL ENDED (Cleaned Up)");
+    stopSilenceDetection();
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop());
@@ -133,6 +211,7 @@ export default function ChatPanel({
 
   const triggerSendAudio = () => {
     if (callStateRef.current === "listening") {
+      stopSilenceDetection();
       setCallState("processing");
       toast.call("Transcribing audio...");
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
@@ -167,6 +246,9 @@ export default function ChatPanel({
 
       mediaRecorder.start();
       setCallState("listening");
+
+      // Start silence detection on the mic stream
+      startSilenceDetection(stream);
 
     } catch (err) {
       console.error("Microphone error:", err);
@@ -460,20 +542,28 @@ export default function ChatPanel({
             </>
           ) : (
              <div className="flex flex-col items-center gap-6 w-full">
-                <div className="flex items-center gap-6">
-                  {callState === "listening" && (
-                    <button
-                       onClick={triggerSendAudio}
-                       className="cursor-pointer w-16 h-16 rounded-full flex items-center justify-center transition-all bg-[#58a6ff] text-white shadow-[0_4px_15px_rgba(88,166,255,0.4)] hover:bg-[#3186e8] hover:scale-105"
-                       title="Send Audio"
-                    >
-                       <Send size={24} />
-                    </button>
-                  )}
+                {/* Audio level visualizer during listening */}
+                {callState === "listening" && (
+                  <div className="flex items-end justify-center gap-[3px] h-10 mb-1">
+                    {Array.from({ length: 7 }).map((_, i) => {
+                      const barScale = [0.5, 0.7, 0.85, 1, 0.85, 0.7, 0.5][i];
+                      const normalizedLevel = Math.min(audioLevel / 60, 1);
+                      const barHeight = Math.max(4, normalizedLevel * 32 * barScale);
+                      return (
+                        <div
+                          key={i}
+                          className="w-[4px] rounded-full bg-[#ff5858] transition-all duration-100"
+                          style={{ height: `${barHeight}px`, opacity: 0.5 + normalizedLevel * 0.5 }}
+                        />
+                      );
+                    })}
+                  </div>
+                )}
 
+                <div className="flex items-center gap-6">
                   <div className="relative">
                     {callState === "listening" && (
-                       <div className="w-16 h-16 rounded-full bg-[#161b22] border-2 border-[#ff5858] flex items-center justify-center shadow-[0_0_20px_rgba(255,88,88,0.3)] animate-pulse">
+                       <div className={`w-16 h-16 rounded-full bg-[#161b22] border-2 border-[#ff5858] flex items-center justify-center shadow-[0_0_20px_rgba(255,88,88,0.3)] ${audioLevel > SILENCE_THRESHOLD ? 'scale-105' : 'scale-100'} transition-transform duration-150`}>
                          <Mic className="w-8 h-8 text-[#ff5858]" />
                        </div>
                     )}
@@ -502,7 +592,7 @@ export default function ChatPanel({
                     callState === "listening" ? "text-[#ff5858]" : 
                     callState === "processing" ? "text-[#58a6ff]" : "text-[#a371f7]"
                 }`}>
-                  {callState === "listening" && "Listening..."}
+                  {callState === "listening" && "Listening... speak now"}
                   {callState === "processing" && "Processing..."}
                   {callState === "speaking" && "Agent Speaking..."}
                 </span>
