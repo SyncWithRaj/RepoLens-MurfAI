@@ -133,9 +133,9 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <div className="mb-8 p-8 bg-gradient-to-br from-[#161b22] to-[#0d1117] border border-[#30363d] rounded-2xl shadow-xl relative overflow-hidden group">
+            <div className="mb-8 p-8 bg-gradient-to-br from-[rgba(22,27,34,0.6)] to-[rgba(13,17,23,0.6)] backdrop-blur-xl border border-[rgba(255,255,255,0.05)] rounded-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.4)] relative overflow-hidden group">
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/cubes.png')" }}></div>
-                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-[#2ea043]/10 to-transparent blur-3xl rounded-full pointer-events-none group-hover:from-[#2ea043]/20 transition-all duration-700"></div>
+                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-gradient-to-bl from-[#2ea043]/10 to-transparent blur-3xl rounded-full pointer-events-none group-hover:from-[#2ea043]/20 transition-all duration-700 animate-glow-pulse"></div>
                 
                 <h2 className="text-lg font-semibold text-white mb-4 relative z-10 flex items-center gap-2">
                     <Plus size={18} className="text-[#2ea043]" />
@@ -157,9 +157,13 @@ export default function Dashboard() {
                     <button
                         onClick={cloneRepo}
                         disabled={loading || !githubUrl}
-                        className="cursor-pointer bg-[#238636] hover:bg-[#2ea043] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold px-8 py-3.5 rounded-xl transition-all border border-[rgba(240,246,252,0.1)] whitespace-nowrap shadow-[0_0_15px_rgba(35,134,54,0.2)] hover:shadow-[0_0_25px_rgba(46,160,67,0.4)] flex items-center justify-center min-w-[180px]"
+                        className="group/btn relative cursor-pointer text-white font-semibold px-8 py-3.5 rounded-xl transition-all duration-300 active:scale-[0.98] border border-[rgba(255,255,255,0.1)] whitespace-nowrap shadow-[0_0_20px_rgba(35,134,54,0.3)] hover:shadow-[0_0_30px_rgba(46,160,67,0.5)] flex items-center justify-center min-w-[180px] overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Clone Repository"}
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#238636] to-[#2ea043] transition-opacity duration-300 group-hover/btn:opacity-90"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] group-hover/btn:translate-x-[150%] transition-transform duration-1000 ease-in-out"></div>
+                        <span className="relative z-10 flex items-center gap-2">
+                            {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Clone Repository"}
+                        </span>
                     </button>
                 </div>
             </div>
@@ -197,11 +201,11 @@ export default function Dashboard() {
                       {repos.map((repo, index) => (
                           <div
                               key={repo._id}
-                              className="group bg-[#0d1117] p-6 rounded-2xl border border-[#30363d] flex flex-col md:flex-row justify-between md:items-center gap-6 hover:bg-[#161b22]/80 transition-all duration-300 shadow-sm hover:shadow-xl hover:border-[#8b949e]/50 relative overflow-hidden animate-fadeInUp"
+                              className="group glass-panel p-6 rounded-2xl flex flex-col md:flex-row justify-between md:items-center gap-6 hover:bg-[rgba(22,27,34,0.6)] transition-all duration-500 shadow-[0_4px_20px_rgba(0,0,0,0.2)] hover:shadow-[0_8px_30px_rgba(88,166,255,0.1)] hover:border-[rgba(88,166,255,0.3)] hover:-translate-y-1 relative overflow-hidden animate-fadeInUp"
                               style={{ animationDelay: `${index * 60}ms` }}
                           >
                               {/* Hover glow line */}
-                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#58a6ff] to-[#a371f7] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#58a6ff] to-[#a371f7] opacity-0 group-hover:opacity-100 transition-all duration-500 group-hover:shadow-[0_0_15px_rgba(88,166,255,0.8)]"></div>
                               
                               <div className="flex items-start gap-4">
                                   <div className="w-10 h-10 rounded-lg bg-[#21262d] border border-[#30363d] flex items-center justify-center shadow-inner group-hover:border-[#58a6ff]/30 transition-colors">
@@ -228,7 +232,7 @@ export default function Dashboard() {
                                   {repo.status === "cloned" && (
                                       <button
                                           onClick={() => indexRepo(repo._id)}
-                                          className="cursor-pointer flex items-center gap-2 text-sm bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] hover:text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-sm"
+                                          className="cursor-pointer flex items-center gap-2 text-sm bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] hover:text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-300 active:scale-95 shadow-sm"
                                       >
                                           <Play size={16} />
                                           Index Architecture
@@ -256,7 +260,7 @@ export default function Dashboard() {
                                       <>
                                           <button
                                               onClick={() => router.push(`/graph/${repo._id}`)}
-                                              className="cursor-pointer flex items-center gap-2 text-sm bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] hover:text-white font-medium px-5 py-2.5 rounded-xl transition-all shadow-sm"
+                                              className="cursor-pointer flex items-center gap-2 text-sm bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-[#c9d1d9] hover:text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-300 active:scale-95 shadow-sm"
                                           >
                                               <Box size={16} />
                                               Visualize Network
@@ -264,10 +268,14 @@ export default function Dashboard() {
                                           <button
                                               onClick={() => embedRepo(repo._id)}
                                               disabled={embeddingRepo === repo._id}
-                                              className="cursor-pointer flex items-center gap-2 text-sm bg-[#58a6ff] hover:bg-[#1f6feb] border border-[rgba(240,246,252,0.1)] text-white font-semibold px-5 py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(88,166,255,0.2)] hover:shadow-[0_0_20px_rgba(88,166,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed"
+                                              className="group/chat cursor-pointer relative flex items-center gap-2 text-sm text-white font-semibold px-5 py-2.5 rounded-xl transition-all duration-300 active:scale-95 shadow-[0_0_15px_rgba(88,166,255,0.2)] hover:shadow-[0_0_20px_rgba(88,166,255,0.5)] border border-[rgba(255,255,255,0.1)] overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
                                           >
-                                              {embeddingRepo === repo._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare size={16} />}
-                                              {embeddingRepo === repo._id ? "Preparing Agent..." : "Chat with Codebase"}
+                                              <div className="absolute inset-0 bg-gradient-to-r from-[#58a6ff] to-[#1f6feb] transition-opacity duration-300 group-hover/chat:opacity-90"></div>
+                                              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] group-hover/chat:translate-x-[150%] transition-transform duration-1000 ease-in-out"></div>
+                                              <span className="relative z-10 flex items-center gap-2">
+                                                {embeddingRepo === repo._id ? <Loader2 className="w-4 h-4 animate-spin" /> : <MessageSquare size={16} />}
+                                                {embeddingRepo === repo._id ? "Preparing Agent..." : "Chat with Codebase"}
+                                              </span>
                                           </button>
                                       </>
                                   )}
@@ -275,7 +283,7 @@ export default function Dashboard() {
                                   <button
                                       onClick={() => deleteRepo(repo._id)}
                                       disabled={repo.status === "indexing"}
-                                      className="cursor-pointer flex justify-center items-center w-10 h-10 bg-[#21262d] hover:bg-[#da3633] text-[#8b949e] hover:text-white border border-[#30363d] hover:border-transparent rounded-xl transition-all shadow-sm group/btn ml-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#21262d] disabled:hover:text-[#8b949e]"
+                                      className="cursor-pointer flex justify-center items-center w-10 h-10 bg-[#21262d] hover:bg-[#da3633] text-[#8b949e] hover:text-white border border-[#30363d] hover:border-transparent rounded-xl transition-all duration-300 active:scale-90 shadow-sm group/btn ml-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#21262d] disabled:hover:text-[#8b949e]"
                                       title="Delete Repository"
                                   >
                                       <Trash2 size={16} className="group-hover/btn:scale-110 transition-transform" />

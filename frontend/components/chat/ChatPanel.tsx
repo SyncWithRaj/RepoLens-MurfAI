@@ -379,7 +379,7 @@ export default function ChatPanel({
             {activeMessages.length > 0 && (
               <button
                 onClick={handleDeleteChat}
-                className="cursor-pointer p-1.5 rounded-lg text-[#8b949e] hover:text-[#f85149] hover:bg-[#f85149]/10 transition-all"
+                className="cursor-pointer p-1.5 rounded-lg text-[#8b949e] hover:text-[#f85149] hover:bg-[#f85149]/10 active:scale-90 transition-all duration-200"
                 title={`Clear ${activeTab} history`}
               >
                 <Trash2 size={14} />
@@ -398,14 +398,14 @@ export default function ChatPanel({
         <div className="flex border-t border-[#30363d]/50">
           <button 
             onClick={() => setActiveTab("chat")} 
-            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase transition-colors ${activeTab === "chat" ? "text-[#58a6ff] border-b-2 border-[#58a6ff] bg-[#0d1117]" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
+            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase transition-all duration-300 ${activeTab === "chat" ? "text-[#58a6ff] border-b-2 border-[#58a6ff] bg-[#0d1117]" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
           >
             <MessageSquare size={14} />
             Chat
           </button>
           <button 
             onClick={() => setActiveTab("call")} 
-            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase transition-colors ${activeTab === "call" ? "text-[#2ea043] border-b-2 border-[#2ea043] bg-[#0d1117]" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
+            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase transition-all duration-300 ${activeTab === "call" ? "text-[#2ea043] border-b-2 border-[#2ea043] bg-[#0d1117]" : "text-[#8b949e] hover:text-[#c9d1d9] hover:bg-[#21262d]"}`}
           >
             <Phone size={14} />
             Call
@@ -413,7 +413,7 @@ export default function ChatPanel({
         </div>
       </div>
 
-      <div className={`flex-1 overflow-y-auto p-4 space-y-6 bg-[#0d1117] custom-scrollbar relative z-0`}>
+      <div className={`flex-1 overflow-y-auto p-4 space-y-6 bg-[#0d1117] custom-scrollbar scroll-smooth relative z-0`}>
         <div className="absolute top-0 right-0 w-[300px] h-[300px] bg-gradient-to-l from-[#58a6ff]/5 to-transparent blur-3xl pointer-events-none -z-10"></div>
         
         {activeMessages.length === 0 ? (
@@ -429,16 +429,16 @@ export default function ChatPanel({
             const isStreamingThis = activeTab === "chat" && msg.role === "assistant" && i === streamingIndex;
 
             return (
-              <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"} animate-fadeIn`}>
+              <div key={i} className={`flex flex-col ${msg.role === "user" ? "items-end" : "items-start"} animate-fadeInUp group`}>
                 <div
-                  className={`max-w-[90%] md:max-w-[85%] rounded-2xl overflow-hidden shadow-sm ${
+                  className={`max-w-[90%] md:max-w-[85%] rounded-2xl overflow-hidden transition-all duration-300 ${
                     msg.role === "user"
-                      ? "bg-[#21262d] border border-[#30363d]/50 rounded-tr-sm"
-                      : "bg-[#161b22] border border-[#30363d] rounded-tl-sm shadow-[0_4px_12px_rgba(0,0,0,0.2)]"
+                      ? "bg-gradient-to-br from-[#21262d] to-[#161b22] border border-[#30363d]/50 rounded-tr-sm shadow-[0_4px_20px_rgba(0,0,0,0.15)] group-hover:shadow-[0_4px_25px_rgba(255,255,255,0.05)]"
+                      : "glass-panel border border-[rgba(255,255,255,0.05)] border-l-2 border-l-[#58a6ff]/50 rounded-tl-sm shadow-[0_4px_25px_rgba(0,0,0,0.3)] group-hover:shadow-[0_8px_30px_rgba(88,166,255,0.1)]"
                   }`}
                 >
-                  <div className={`px-4 py-2 text-[11px] font-bold tracking-wide uppercase flex items-center gap-2 ${
-                    msg.role === "user" ? "text-[#c9d1d9] justify-end" : "text-[#58a6ff] border-b border-[#30363d]/50 bg-[#0d1117]/50"
+                  <div className={`px-4 py-2 text-[11px] font-bold tracking-wide uppercase flex items-center gap-2 transition-all duration-300 ${
+                    msg.role === "user" ? "text-[#c9d1d9] justify-end" : "text-[#58a6ff] border-b border-[rgba(255,255,255,0.05)] bg-[rgba(0,0,0,0.2)]"
                   }`}>
                     {msg.role === "assistant" && <Bot size={14} className="text-[#58a6ff]" />}
                     {msg.role === "user" ? "You" : "RepoLens"}
@@ -481,9 +481,9 @@ export default function ChatPanel({
         )}
 
         {loading && (
-          <div className="flex items-start">
-            <div className="max-w-[85%] border border-[#30363d] rounded-2xl rounded-tl-sm overflow-hidden bg-[#161b22] shadow-[0_4px_12px_rgba(0,0,0,0.2)]">
-              <div className="px-4 py-2 text-[11px] font-bold tracking-wide uppercase border-b border-[#30363d]/50 bg-[#0d1117]/50 text-[#58a6ff] flex items-center gap-2">
+          <div className="flex items-start animate-fadeInUp">
+            <div className="max-w-[85%] glass-panel border border-[rgba(255,255,255,0.05)] border-l-2 border-l-[#58a6ff]/50 rounded-2xl rounded-tl-sm overflow-hidden shadow-[0_4px_25px_rgba(0,0,0,0.3)]">
+              <div className="px-4 py-2 text-[11px] font-bold tracking-wide uppercase border-b border-[rgba(255,255,255,0.05)] bg-[rgba(0,0,0,0.2)] text-[#58a6ff] flex items-center gap-2">
                 <Bot size={14} className="text-[#58a6ff]" />
                 RepoLens
               </div>
@@ -502,8 +502,9 @@ export default function ChatPanel({
       </div>
 
       {activeTab === "chat" ? (
-        <div className="px-4 py-4 bg-[#0d1117] border-t border-[#30363d] relative z-10">
-          <div className="bg-[#161b22] border border-[#30363d] rounded-xl focus-within:border-[#58a6ff] focus-within:shadow-[0_0_15px_rgba(88,166,255,0.15)] transition-all overflow-hidden flex flex-col shadow-inner">
+        <div className="px-4 py-6 bg-gradient-to-t from-[#0d1117] via-[#0d1117] to-transparent relative z-10 w-full pt-10 mt-auto">
+          <div className="glass-panel border border-[#30363d]/50 rounded-2xl focus-within:border-[#58a6ff]/70 focus-within:shadow-[0_0_20px_rgba(88,166,255,0.2)] focus-within:bg-[rgba(22,27,34,0.7)] transition-all duration-500 overflow-hidden flex flex-col relative group/input">
+            <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-[#58a6ff]/50 to-[#a371f7]/50 opacity-0 group-focus-within/input:opacity-100 transition-opacity duration-500"></div>
             <textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -512,16 +513,20 @@ export default function ChatPanel({
               className="w-full bg-transparent p-4 text-[13px] text-[#c9d1d9] focus:outline-none resize-none min-h-[70px] placeholder:text-[#484f58]"
               disabled={loading}
             />
-            <div className="flex justify-between items-center px-3 py-2 bg-[#161b22] border-t border-[#30363d]/50">
+            <div className="flex justify-between items-center px-4 py-3 border-t border-[rgba(255,255,255,0.05)] bg-[rgba(0,0,0,0.15)] relative z-10">
               <span className="text-[10px] text-[#8b949e] flex items-center gap-1 font-medium">
-                <kbd className="px-1.5 py-0.5 border border-[#30363d] rounded bg-[#0d1117] font-mono shadow-sm">Enter</kbd> to send
+                <kbd className="px-1.5 py-0.5 border border-[#30363d]/50 rounded bg-[#0d1117]/50 shadow-sm font-mono">Enter</kbd> to send
               </span>
               <button
                 onClick={sendMessage}
                 disabled={loading || !input.trim()}
-                className="cursor-pointer bg-[#238636] hover:bg-[#2ea043] disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold text-[11px] px-4 py-1.5 rounded-lg transition-all flex items-center gap-1.5 shadow-sm"
+                className="group/send relative cursor-pointer text-white font-semibold text-[11px] px-5 py-2 rounded-xl transition-all duration-300 active:scale-95 disabled:active:scale-100 disabled:opacity-50 disabled:cursor-not-allowed border border-[rgba(255,255,255,0.1)] shadow-[0_0_15px_rgba(35,134,54,0.2)] hover:shadow-[0_0_20px_rgba(46,160,67,0.4)] overflow-hidden flex items-center gap-1.5"
               >
-                Send <Send size={12} />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#238636] to-[#2ea043] transition-opacity duration-300 group-hover/send:opacity-90"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] group-hover/send:translate-x-[150%] transition-transform duration-1000 ease-in-out"></div>
+                <span className="relative z-10 flex items-center gap-1.5">
+                  Send <Send size={12} className="group-hover/send:translate-x-0.5 transition-transform" />
+                </span>
               </button>
             </div>
           </div>
@@ -534,7 +539,7 @@ export default function ChatPanel({
             <>
               <button
                  onClick={startListeningPhase}
-                 className="cursor-pointer w-20 h-20 rounded-full flex items-center justify-center transition-all bg-[#2ea043] border border-[#2ea043] text-white hover:bg-[#238636] hover:scale-105 shadow-[0_0_15px_rgba(46,160,67,0.3)]"
+                 className="cursor-pointer w-20 h-20 rounded-full flex items-center justify-center transition-all duration-300 bg-[#2ea043] border border-[#2ea043] text-white hover:bg-[#238636] hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(46,160,67,0.3)]"
               >
                 <Phone size={32} />
               </button>
@@ -583,7 +588,7 @@ export default function ChatPanel({
 
                   <button
                      onClick={cleanupCall}
-                     className="cursor-pointer w-16 h-16 rounded-full flex items-center justify-center transition-all bg-[#ff5858] text-white shadow-[0_4px_15px_rgba(255,88,88,0.4)] hover:bg-[#d73a49] hover:scale-105"
+                     className="cursor-pointer w-16 h-16 rounded-full flex items-center justify-center transition-all duration-300 bg-[#ff5858] text-white shadow-[0_4px_15px_rgba(255,88,88,0.4)] hover:bg-[#d73a49] hover:scale-105 active:scale-95"
                      title="End Call"
                   >
                      <PhoneOff size={24} />

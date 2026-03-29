@@ -50,10 +50,10 @@ export default function Navbar() {
 
   return (
     <nav 
-      className={`sticky top-[15px] mx-[15px] z-50 transition-all duration-300 rounded-2xl ${
+      className={`sticky top-[15px] mx-[15px] z-50 transition-all duration-500 rounded-2xl ${
         scrolled 
-          ? "bg-[#0d1117]/60 backdrop-blur-md border border-[#30363d]/80 shadow-[0_8px_30px_rgba(0,0,0,0.4)]" 
-          : "bg-[#0d1117]/40 backdrop-blur-sm border border-[#30363d]/40"
+          ? "glass-panel shadow-[0_8px_40px_rgba(0,0,0,0.6)] border-b border-[#58a6ff]/20" 
+          : "bg-[#0d1117]/30 backdrop-blur-xl border border-[rgba(255,255,255,0.05)] shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
       } text-[#c9d1d9] px-6 py-3.5 flex items-center justify-between`}
     >
       <div className="flex items-center space-x-6">
@@ -62,7 +62,7 @@ export default function Navbar() {
           <div className="flex items-center gap-4">
             <Link 
               href="/dashboard"
-              className="flex items-center justify-center p-2 rounded-lg bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9] hover:text-white transition-all duration-300 border border-[#30363d] hover:border-[#8b949e]/50 shadow-sm"
+              className="flex items-center justify-center p-2 rounded-lg bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9] hover:text-white transition-all duration-300 active:scale-95 border border-[#30363d] hover:border-[#8b949e]/50 shadow-sm"
               title="Back to Dashboard"
             >
               <ArrowLeft size={18} />
@@ -74,21 +74,22 @@ export default function Navbar() {
           </div>
         ) : (
           <Link href="/" className="flex items-center space-x-2 text-white group">
-            <div className="p-1.5 rounded-lg bg-[#21262d] border border-[#30363d] group-hover:border-[#58a6ff]/50 transition-colors shadow-inner">
-               <Terminal size={22} className="text-[#c9d1d9] group-hover:text-[#58a6ff] transition-colors" />
+            <div className="relative p-1.5 rounded-lg bg-[#21262d] border border-[#30363d] group-hover:border-[#58a6ff]/50 transition-all duration-300 shadow-inner group-hover:shadow-[0_0_15px_rgba(88,166,255,0.4)]">
+               <div className="absolute inset-0 bg-[#58a6ff] opacity-0 group-hover:opacity-20 blur-md rounded-lg transition-opacity duration-300"></div>
+               <Terminal size={22} className="relative z-10 text-[#c9d1d9] group-hover:text-[#58a6ff] transition-colors duration-300" />
             </div>
-            <span className="font-bold text-xl tracking-tight">RepoLens</span>
+            <span className="font-bold text-xl tracking-tight bg-clip-text group-hover:text-transparent group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-[#58a6ff] transition-all duration-300">RepoLens</span>
           </Link>
         )}
 
         <div className="hidden md:flex space-x-2">
-          <Link href="/about" className="text-sm font-medium text-[#c9d1d9] hover:text-white hover:bg-[#21262d] px-3 py-1.5 rounded-md transition-all duration-300 relative group overflow-hidden">
+          <Link href="/about" className="text-sm font-medium text-[#8b949e] hover:text-[#c9d1d9] px-3 py-1.5 rounded-md transition-all duration-300 relative group overflow-hidden">
             <span className="relative z-10">About</span>
-            <div className="absolute bottom-0 left-0 h-[1px] w-0 bg-[#c9d1d9] transition-all duration-300 group-hover:w-full"></div>
+            <div className="absolute bottom-1 left-3 right-3 h-[2px] bg-gradient-to-r from-[#58a6ff] to-[#a371f7] opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-x-50 group-hover:scale-x-100 rounded-full"></div>
           </Link>
-          <Link href="/contact" className="text-sm font-medium text-[#c9d1d9] hover:text-white hover:bg-[#21262d] px-3 py-1.5 rounded-md transition-all duration-300 relative group overflow-hidden">
+          <Link href="/contact" className="text-sm font-medium text-[#8b949e] hover:text-[#c9d1d9] px-3 py-1.5 rounded-md transition-all duration-300 relative group overflow-hidden">
             <span className="relative z-10">Contact Us</span>
-            <div className="absolute bottom-0 left-0 h-[1px] w-0 bg-[#c9d1d9] transition-all duration-300 group-hover:w-full"></div>
+            <div className="absolute bottom-1 left-3 right-3 h-[2px] bg-gradient-to-r from-[#2ea043] to-[#58a6ff] opacity-0 group-hover:opacity-100 transition-all duration-300 transform scale-x-50 group-hover:scale-x-100 rounded-full"></div>
           </Link>
         </div>
       </div>
@@ -104,7 +105,7 @@ export default function Navbar() {
             </Link>
             <button 
               onClick={handleLogout}
-              className="text-sm text-[#f85149] hover:text-white hover:bg-[#da3633] hover:border-[#da3633] transition-all duration-300 font-medium bg-[#21262d] border border-[#30363d] px-4 py-1.5 rounded-lg shadow-sm"
+              className="text-sm text-[#f85149] hover:text-white hover:bg-[#da3633] hover:border-[#da3633] transition-all duration-300 active:scale-95 font-medium bg-[#21262d] border border-[#30363d] px-4 py-1.5 rounded-lg shadow-sm"
             >
               Logout
             </button>
@@ -112,9 +113,11 @@ export default function Navbar() {
         ) : (
           <Link 
             href="/login" 
-            className="text-sm font-semibold bg-[#238636] hover:bg-[#2ea043] text-white px-5 py-2 rounded-lg border border-[rgba(240,246,252,0.1)] transition-all duration-300 shadow-[0_0_15px_rgba(35,134,54,0.2)] hover:shadow-[0_0_20px_rgba(46,160,67,0.4)] block"
+            className="group relative text-sm font-semibold text-white px-6 py-2 rounded-lg transition-all duration-300 active:scale-95 block overflow-hidden border border-[rgba(255,255,255,0.1)] shadow-[0_0_20px_rgba(35,134,54,0.3)] hover:shadow-[0_0_30px_rgba(46,160,67,0.5)]"
           >
-            Sign in
+            <div className="absolute inset-0 bg-gradient-to-r from-[#238636] to-[#2ea043] transition-opacity duration-300 group-hover:opacity-90"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-[150%] group-hover:translate-x-[150%] transition-transform duration-1000 ease-in-out"></div>
+            <span className="relative z-10 flex items-center gap-2">Sign in</span>
           </Link>
         )}
       </div>

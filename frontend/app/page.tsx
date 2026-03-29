@@ -9,9 +9,9 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative w-full min-h-[90vh] flex flex-col items-center justify-center pt-32 pb-24 px-6 overflow-hidden">
         {/* Advanced Abstract Background Glows */}
-        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-[#58a6ff] opacity-[0.08] blur-[150px] rounded-full pointer-events-none mix-blend-screen animate-pulse-slow"></div>
-        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-[#a371f7] opacity-[0.08] blur-[150px] rounded-full pointer-events-none mix-blend-screen animate-pulse-slow max-md:hidden"></div>
-        <div className="absolute top-[20%] right-[10%] w-[300px] h-[300px] bg-[#2ea043] opacity-[0.05] blur-[100px] rounded-full pointer-events-none mix-blend-screen"></div>
+        <div className="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] bg-gradient-to-br from-[#58a6ff] to-[#1f6feb] opacity-[0.12] blur-[150px] rounded-full pointer-events-none mix-blend-screen animate-glow-pulse"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-gradient-to-tl from-[#a371f7] to-[#79c0ff] opacity-[0.12] blur-[150px] rounded-full pointer-events-none mix-blend-screen animate-glow-pulse max-md:hidden" style={{ animationDelay: '2s' }}></div>
+        <div className="absolute top-[20%] right-[10%] w-[400px] h-[400px] bg-gradient-to-br from-[#2ea043] to-[#238636] opacity-[0.08] blur-[120px] rounded-full pointer-events-none mix-blend-screen animate-float"></div>
 
         {/* Grid Background */}
         <div className="absolute inset-0 opacity-[0.015] pointer-events-none" style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }}></div>
@@ -24,9 +24,9 @@ export default function Home() {
             <ArrowRight className="w-3 h-3 ml-1 text-[#8b949e] group-hover:text-[#c9d1d9] transform group-hover:translate-x-0.5 transition-transform" />
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-[#c9d1d9] to-[#8b949e] leading-[1.1] pb-2 drop-shadow-sm">
+          <h1 className="text-6xl md:text-8xl font-black tracking-tighter mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-[#8b949e] leading-[1.1] pb-2 drop-shadow-[0_0_40px_rgba(255,255,255,0.2)]">
             Understand your code. <br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#58a6ff] to-[#a371f7]">Faster than ever.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#58a6ff] via-[#a371f7] to-[#58a6ff] bg-[length:200%_auto] animate-shimmer drop-shadow-[0_0_30px_rgba(163,113,247,0.4)]">Faster than ever.</span>
           </h1>
 
           <p className="text-xl md:text-2xl text-[#8b949e] mb-12 max-w-3xl mx-auto leading-relaxed font-light">
@@ -36,7 +36,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/dashboard"
-              className="group relative flex items-center justify-center px-8 py-4 text-base font-semibold rounded-xl bg-[#238636] text-white overflow-hidden transition-all duration-300 w-full sm:w-auto shadow-[0_0_20px_rgba(35,134,54,0.3)] hover:shadow-[0_0_35px_rgba(46,160,67,0.5)] border border-[#2ea043]"
+              className="group relative flex items-center justify-center px-8 py-4 text-base font-semibold rounded-xl bg-[#238636] text-white overflow-hidden transition-all duration-300 active:scale-[0.98] w-full sm:w-auto shadow-[0_0_20px_rgba(35,134,54,0.3)] hover:shadow-[0_0_35px_rgba(46,160,67,0.5)] border border-[#2ea043]"
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
               <span className="relative z-10 flex items-center gap-2">
@@ -46,7 +46,7 @@ export default function Home() {
             </Link>
             <Link
               href="/about"
-              className="group flex items-center justify-center px-8 py-4 text-base font-semibold rounded-xl bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9] border border-[#30363d] hover:border-[#8b949e] transition-all duration-300 w-full sm:w-auto shadow-sm"
+              className="group flex items-center justify-center px-8 py-4 text-base font-semibold rounded-xl bg-[#21262d] hover:bg-[#30363d] text-[#c9d1d9] border border-[#30363d] hover:border-[#8b949e] transition-all duration-300 active:scale-[0.98] w-full sm:w-auto shadow-sm"
             >
               Read the Docs
             </Link>
@@ -101,7 +101,7 @@ export default function Home() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
           {/* Feature 1 */}
-          <div className="group p-8 rounded-2xl bg-[#161b22]/80 backdrop-blur-sm border border-[#30363d] shadow-lg hover:border-[#58a6ff] hover:shadow-[0_0_40px_rgba(88,166,255,0.15)] transition-all duration-500 overflow-hidden relative cursor-crosshair">
+          <div className="group glass-panel p-8 rounded-2xl transition-all duration-500 overflow-hidden relative cursor-crosshair hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] hover:border-[rgba(88,166,255,0.4)]">
             <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-10 transition-opacity duration-500 transform group-hover:scale-110">
               <Database size={150} />
             </div>
@@ -115,7 +115,7 @@ export default function Home() {
           </div>
 
           {/* Feature 2 */}
-          <div className="group p-8 rounded-2xl bg-[#161b22]/80 backdrop-blur-sm border border-[#30363d] shadow-lg hover:border-[#2ea043] hover:shadow-[0_0_40px_rgba(46,160,67,0.15)] transition-all duration-500 overflow-hidden relative cursor-crosshair md:translate-y-8">
+          <div className="group glass-panel p-8 rounded-2xl transition-all duration-500 overflow-hidden relative cursor-crosshair hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] hover:border-[rgba(46,160,67,0.4)] md:translate-y-8">
             <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-10 transition-opacity duration-500 transform group-hover:scale-110">
               <MessageSquare size={150} />
             </div>
@@ -129,7 +129,7 @@ export default function Home() {
           </div>
 
           {/* Feature 3 */}
-          <div className="group p-8 rounded-2xl bg-[#161b22]/80 backdrop-blur-sm border border-[#30363d] shadow-lg hover:border-[#a371f7] hover:shadow-[0_0_40px_rgba(163,113,247,0.15)] transition-all duration-500 overflow-hidden relative cursor-crosshair">
+          <div className="group glass-panel p-8 rounded-2xl transition-all duration-500 overflow-hidden relative cursor-crosshair hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)] hover:border-[rgba(163,113,247,0.4)]">
             <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-10 transition-opacity duration-500 transform group-hover:scale-110">
               <Layers size={150} />
             </div>
@@ -283,23 +283,23 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-[#0d1117] border border-[#30363d] p-8 rounded-2xl hover:border-[#8b949e] transition-colors">
-              <div className="mb-6 bg-[#21262d] w-14 h-14 rounded-lg flex items-center justify-center border border-[#30363d]">
-                <Code2 className="text-[#58a6ff]" size={28} />
+            <div className="glass-panel glass-panel-hover p-8 rounded-2xl transition-all duration-500 group/card">
+              <div className="mb-6 bg-[rgba(33,38,45,0.5)] w-14 h-14 rounded-lg flex items-center justify-center border border-[rgba(255,255,255,0.05)] shadow-inner group-hover/card:border-[#58a6ff]/50 transition-colors">
+                <Code2 className="text-[#58a6ff] group-hover/card:scale-110 transition-transform duration-300" size={28} />
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">Engineers</h3>
               <p className="text-[#8b949e] leading-relaxed">Stop grepping. Ask "where do we parse JWTs?" and immediately get the exact file and function highlighted in the integrated editor.</p>
             </div>
-            <div className="bg-[#0d1117] border border-[#30363d] p-8 rounded-2xl hover:border-[#8b949e] transition-colors">
-              <div className="mb-6 bg-[#21262d] w-14 h-14 rounded-lg flex items-center justify-center border border-[#30363d]">
-                <Workflow className="text-[#a371f7]" size={28} />
+            <div className="glass-panel glass-panel-hover p-8 rounded-2xl transition-all duration-500 group/card">
+              <div className="mb-6 bg-[rgba(33,38,45,0.5)] w-14 h-14 rounded-lg flex items-center justify-center border border-[rgba(255,255,255,0.05)] shadow-inner group-hover/card:border-[#a371f7]/50 transition-colors">
+                <Workflow className="text-[#a371f7] group-hover/card:scale-110 transition-transform duration-300" size={28} />
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">Architects</h3>
               <p className="text-[#8b949e] leading-relaxed">Visualize deeply nested architectures via the 2D network graph. Understand dependencies and tech debt from a birds-eye view.</p>
             </div>
-            <div className="bg-[#0d1117] border border-[#30363d] p-8 rounded-2xl hover:border-[#8b949e] transition-colors">
-              <div className="mb-6 bg-[#21262d] w-14 h-14 rounded-lg flex items-center justify-center border border-[#30363d]">
-                <Bot className="text-[#2ea043]" size={28} />
+            <div className="glass-panel glass-panel-hover p-8 rounded-2xl transition-all duration-500 group/card">
+              <div className="mb-6 bg-[rgba(33,38,45,0.5)] w-14 h-14 rounded-lg flex items-center justify-center border border-[rgba(255,255,255,0.05)] shadow-inner group-hover/card:border-[#2ea043]/50 transition-colors">
+                <Bot className="text-[#2ea043] group-hover/card:scale-110 transition-transform duration-300" size={28} />
               </div>
               <h3 className="text-2xl font-bold text-white mb-3">New Hires</h3>
               <p className="text-[#8b949e] leading-relaxed">Slash onboarding time by 80%. Let the AI explainer walk you through business logic rules and API structure step-by-step.</p>
@@ -311,7 +311,7 @@ export default function Home() {
       {/* Extended Details / Security Section */}
       <section className="w-full bg-[#0d1117] py-24 px-6 border-b border-[#30363d]">
         <div className="max-w-6xl mx-auto">
-          <div className="rounded-3xl bg-gradient-to-br from-[#161b22] to-[#0d1117] border border-[#30363d] p-8 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl relative overflow-hidden group">
+          <div className="rounded-3xl bg-gradient-to-br from-[rgba(22,27,34,0.6)] to-[rgba(13,17,23,0.8)] backdrop-blur-2xl border border-[rgba(255,255,255,0.05)] p-8 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden group">
             <div className="absolute inset-0 opacity-10 mix-blend-screen" style={{ backgroundImage: "url('https://www.transparenttextures.com/patterns/stardust.png')" }}></div>
 
             <div className="max-w-lg relative z-10">
@@ -335,7 +335,7 @@ export default function Home() {
             </div>
 
             <div className="w-full md:w-1/2 flex justify-center relative z-10">
-              <div className="relative w-full max-w-md aspect-square bg-[#010409] border border-[#30363d] rounded-2xl shadow-2xl overflow-hidden flex flex-col items-center justify-center p-8 group-hover:border-[#30363d]/80 transition">
+              <div className="relative w-full max-w-md aspect-square glass-panel rounded-2xl overflow-hidden flex flex-col items-center justify-center p-8 group-hover:border-[rgba(255,255,255,0.1)] transition-all duration-500">
                 <div className="absolute inset-0 bg-gradient-to-t from-[#2ea043]/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
                 <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-[#2ea043] to-[#58a6ff] blur-3xl opacity-30 group-hover:opacity-60 transition-opacity duration-700 absolute"></div>
                 <Network size={100} className="text-[#c9d1d9] relative z-10 animate-[spin_30s_linear_infinite]" strokeWidth={1} />
@@ -361,7 +361,7 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Link
               href="/dashboard"
-              className="flex justify-center items-center gap-2 px-10 py-5 bg-white text-black font-bold text-lg rounded-xl hover:bg-gray-200 transition-colors shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_40px_rgba(255,255,255,0.4)]"
+              className="flex justify-center items-center gap-2 px-10 py-5 bg-white text-black font-bold text-lg rounded-xl hover:bg-gray-200 transition-all duration-300 active:scale-[0.98] shadow-[0_0_30px_rgba(255,255,255,0.2)] hover:shadow-[0_0_40px_rgba(255,255,255,0.4)]"
             >
               Start Building Free
               <ChevronRight className="w-5 h-5" />
