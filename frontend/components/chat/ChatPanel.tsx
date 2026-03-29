@@ -207,7 +207,7 @@ export default function ChatPanel({
       audioRef.current.src = "";
     }
     setCallState("idle");
-    toast.info("Call ended");
+    toast("Call ended");
   };
 
   const triggerSendAudio = () => {
@@ -215,7 +215,7 @@ export default function ChatPanel({
       stopSilenceDetection();
       callStateRef.current = "processing"; // Sync update BEFORE stopping recorder
       setCallState("processing");
-      toast.call("Transcribing audio...");
+      toast("Transcribing audio...");
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
         mediaRecorderRef.current.stop();
       }
@@ -285,14 +285,14 @@ export default function ChatPanel({
               { role: "user", content: userText },
               { role: "assistant", content: answer, references: references },
             ]);
-            toast.call("LLM responded");
+            toast.success("LLM responded");
             setTimeout(scrollToBottom, 500);
           }
 
           if (chunks && chunks.length > 0) {
             console.log("Call Status: SPEAKING (TTS PLAYBACK) - CHUNKED QUEUE STARTING");
             setCallState("speaking");
-            toast.call("Agent speaking...");
+            toast("Agent speaking...");
             await playTTSQueue(chunks, 0);
           } else {
             if (callStateRef.current !== "idle") startListeningPhase();
