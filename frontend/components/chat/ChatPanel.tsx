@@ -196,6 +196,7 @@ export default function ChatPanel({
 
   const cleanupCall = () => {
     console.log("Call Status: CALL ENDED (Cleaned Up)");
+    callStateRef.current = "idle"; // Sync update BEFORE stopping recorder
     stopSilenceDetection();
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
@@ -212,6 +213,7 @@ export default function ChatPanel({
   const triggerSendAudio = () => {
     if (callStateRef.current === "listening") {
       stopSilenceDetection();
+      callStateRef.current = "processing"; // Sync update BEFORE stopping recorder
       setCallState("processing");
       toast.call("Transcribing audio...");
       if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
